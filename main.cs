@@ -9,6 +9,8 @@ namespace Control
             Console.WriteLine("Hello");
 
             Command command = new Command("My command");
+
+            command.Parse();
             
         }
 
