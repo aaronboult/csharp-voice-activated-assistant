@@ -1,23 +1,23 @@
 <xml version="1.0" encoding="utf-8" standalone="yes">
-    <addition>
+    <addition symbol="+">
         <word>add</word>
         <word>plus</word>
         <word>and</word>
         <word>more than</word>
     </addition>
-    <subtraction>
+    <subtraction symbol="-">
         <word>subtract</word>
         <word>minus</word>
         <word>less</word>
         <word inverse-args="true">less than</word>
         <word>take</word>
     </subtraction>
-    <multiplication>
+    <multiplication symbol="*">
         <word>times</word>
         <word>multiplied by</word>
         <word>lots of</word>
     </multiplication>
-    <division>
+    <division symbol="/">
         <word>divided by</word>
         <word>over</word>
         <word>by</word>

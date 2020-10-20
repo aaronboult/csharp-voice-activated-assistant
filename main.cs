@@ -1,4 +1,5 @@
 using System;
+using MathAbstractions;
 
 namespace Control
 {
@@ -6,11 +7,11 @@ namespace Control
 
         static void Main(string[] args){
 
-            Console.WriteLine("Hello");
+            // Command command = new Command("My command");
 
-            Command command = new Command("My command");
+            // command.Parse();
 
-            command.Parse();
+            Tree.__Test__();
             
         }
 

@@ -40,10 +40,6 @@ namespace Control{
 
             commandWords.Load("mathematical-command-words.xml");
 
-            Console.WriteLine(
-                commandWords.DocumentElement.FirstChild.OuterXml
-            );
-
             string[] commandComponents = this.command.Split(' ');
 
             string equation = ""; // Construct this whenever a keyword or number is found
@@ -56,6 +52,8 @@ namespace Control{
 
                     numberOfNumericals++;
 
+                    equation += $"{value} ";
+
                     if (numberOfNumericals > 1){
 
                         return false;
@@ -67,7 +65,9 @@ namespace Control{
 
                     numberOfNumericals = 0;
 
-                    if (IsKeyword(value)){
+                    if (IsKeyword(commandWords, value)){
+
+                        equation += $"{value} ";
 
                     }
 
@@ -80,6 +80,8 @@ namespace Control{
         }
 
         bool IsKeyword(XmlDocument lookup, string value){
+
+            return false;
 
         }
 
