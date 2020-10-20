@@ -4,12 +4,18 @@ using System.Collections.Generic;
 
 namespace MathAbstractions{
 
+    /// <summary>
+    /// A collection of ordered components in an expression based on BIDMAS
+    /// </summary>
     public class Tree{
 
         Branch entry;
 
         bool debug = false;
 
+        /// <summary>
+        /// Perform tests to check whether the parser is working properly
+        /// </summary>
         public static void __Test__(){
 
             PerformTest("5 + 5", 10);
@@ -20,8 +26,15 @@ namespace MathAbstractions{
 
             PerformTest("2 * 3 * 4 * 5 * 6 * 7", 5040);
 
+            PerformTest("-6 + 3", -3);
+
         }
 
+        /// <summary>
+        /// Perform a test on the parser
+        /// </summary>
+        /// <param name="expression">The expression to parse</param>
+        /// <param name="expected">The expected result</param>
         static void PerformTest(string expression, float expected){
 
             Tree testTree = new Tree(expression, true); // Expect 9
@@ -30,13 +43,18 @@ namespace MathAbstractions{
 
         }
 
+        /// <summary>
+        /// Construct a new Tree object
+        /// </summary>
+        /// <param name="equation">The equation to parse</param>
+        /// <param name="debug">Whether or not to display debug information</param>
         public Tree(string equation, bool debug = false){
 
             this.debug = debug;
 
             List<string> components = equation.Split(" "[0]).ToList(); // Equation should be in the format: [operand, operator, operand, operator, operand...]
 
-            Branch leftNode = null;
+            Branch leftBranch = null;
 
             Branch currentBranch = null;
 
@@ -44,18 +62,18 @@ namespace MathAbstractions{
 
             for (int i = 0 ; i < components.Count - 1 ; i+=2){
 
-                if (components[i + 1] == "*" || components[i + 1] == "/" || components.Count - 3 <= i){
+                if (components[i + 1] == "*" || components[i + 1] == "/" || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
 
                     currentBranch = new Branch(components[i + 1], components[i + 2]);
 
                 }
-                else if (components[i + 3] == "*" || components[i + 3] == "/"){
+                else if (components[i + 3] == "*" || components[i + 3] == "/"){ // If the next operation is to be executed before the current
 
-                    Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]);
+                    Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]); // Create a branch encasing the next operation
 
                     currentBranch = new Branch(components[i + 1], tempBranch);
 
-                    positionOffset = 2;
+                    positionOffset = 2; // Skip the operation just encased
 
                 }
                 else{
@@ -64,18 +82,18 @@ namespace MathAbstractions{
 
                 }
 
-                if (leftNode == null){
+                if (leftBranch == null){
 
-                    currentBranch.left = float.Parse(components[i]);
+                    currentBranch.left = float.Parse(components[i]); // Current branch acts as the initial starting point
 
                 }
                 else{
                     
-                    currentBranch.leftPointer = leftNode;
+                    currentBranch.leftPointer = leftBranch; // Point the input of the left side of the current expression to the output of the previous expression
 
                 }
 
-                leftNode = currentBranch;
+                leftBranch = currentBranch;
                 
                 i += positionOffset;
 
@@ -87,6 +105,10 @@ namespace MathAbstractions{
 
         }
 
+        /// <summary>
+        /// Calculate the value from the parsed expression
+        /// </summary>
+        /// <returns>The value of the expression</returns>
         public float Calculate(){
 
             float value = this.entry.Calculate(this.debug);
@@ -101,10 +123,13 @@ namespace MathAbstractions{
 
     }
 
+    /// <summary>
+    /// A single branch expression that applies a certain operation to a left and right value
+    /// </summary>
     class Branch{
 
         public float value;
-        public bool calculated = false;
+        public bool calculated = false; // Used to avoid unnecessary recalculations
 
         public float left;
 
@@ -116,7 +141,7 @@ namespace MathAbstractions{
             }
 
             set{
-                _leftPointer = _leftPointer == null ? value : _leftPointer;
+                _leftPointer = _leftPointer == null ? value : _leftPointer; // Preent the pointer being overwritten
             }
 
         }
@@ -131,26 +156,40 @@ namespace MathAbstractions{
             }
 
             set{
-                _rightPointer = _rightPointer == null ? value : _rightPointer;
+                _rightPointer = _rightPointer == null ? value : _rightPointer; // Prevent the pointer being overwritten
             }
 
         }
 
         Operation operation;
         
-        bool inverse = false;
+        bool inverse = false; // Whether the 'left' expression should be on the left (false) or on the right (true)
 
+        /// <summary>
+        /// Determines the operation to be carried out
+        /// </summary>
         enum Operation{
             ADD, SUBTRACT,
             MULTIPLY, DIVIDE
         }
 
+        /// <summary>
+        /// Construct a new Branch object
+        /// </summary>
+        /// <param name="operation">The operation to be carried out on the two inputs</param>
+        /// <param name="left">The left side constant of the expression</param>
+        /// <param name="right">The right side constant of the expression</param>
         public Branch(string operation, string left, string right) : this(operation, right){
 
             this.left = float.Parse(left);
 
         }
 
+        /// <summary>
+        /// Constructs a new Branch object
+        /// </summary>
+        /// <param name="operation">The operation to be carried out on the two inputs</param>
+        /// <param name="right">The right side constant of the expression</param>
         public Branch(string operation, string right){
 
             this.operation = GetOperation(operation);
@@ -159,6 +198,11 @@ namespace MathAbstractions{
 
         }
 
+        /// <summary>
+        /// Constructs a new Branch object
+        /// </summary>
+        /// <param name="operation">The operation to be carried out on the two inputs</param>
+        /// <param name="right">An instance of a Branch with both left and right sides of the expression set</param>
         public Branch(string operation, Branch right){
 
             this.operation = GetOperation(operation);
@@ -167,6 +211,11 @@ namespace MathAbstractions{
 
         }
 
+        /// <summary>
+        /// Get an operation enumerable from a string
+        /// </summary>
+        /// <param name="operation">The operation to be carried out</param>
+        /// <returns>An operation enumerable representing the operation to be carried out</returns>
         Operation GetOperation(string operation){
 
             switch (operation){
@@ -189,11 +238,16 @@ namespace MathAbstractions{
 
         }
 
+        /// <summary>
+        /// Calculate the value of the expression
+        /// </summary>
+        /// <param name="debug">Whether or not to show debug information</param>
+        /// <returns>The value of the expression calculated</returns>
         public float Calculate(bool debug = false){
 
             if (this.calculated){
 
-                return this.value;
+                return this.value; // Avoid recalculating the same value
 
             }
             
