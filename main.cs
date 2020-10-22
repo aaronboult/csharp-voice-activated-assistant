@@ -1,5 +1,5 @@
 using System;
-using MathAbstractions;
+using MathsAbstractions;
 
 namespace Control
 {
@@ -7,12 +7,10 @@ namespace Control
 
         static void Main(string[] args){
 
-            // Command command = new Command("My command");
+            Command.__TestExpressionParser__();
 
-            // command.Parse();
+            // Tree.__Test__();
 
-            Tree.__Test__();
-            
         }
 
     }

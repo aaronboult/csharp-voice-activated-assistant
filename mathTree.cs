@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace MathAbstractions{
+namespace MathsAbstractions{
 
     /// <summary>
     /// A collection of ordered components in an expression based on BIDMAS
@@ -18,15 +18,17 @@ namespace MathAbstractions{
         /// </summary>
         public static void __Test__(){
 
-            PerformTest("5 + 5", 10);
+            __PerformTest__("5 + 5", 10);
 
-            PerformTest("3 * 3 - 2 * 4", 1);
+            __PerformTest__("3 * 3 - 2 * 4", 1);
 
-            PerformTest("9 - 8 * 7 + 6 / 2", -44);
+            __PerformTest__("9 - 8 * 7 + 6 / 2", -44);
 
-            PerformTest("2 * 3 * 4 * 5 * 6 * 7", 5040);
+            __PerformTest__("2 * 3 * 4 * 5 * 6 * 7", 5040);
 
-            PerformTest("-6 + 3", -3);
+            __PerformTest__("-6 + 3", -3);
+
+            __PerformTest__("3 -inv 6", 3);
 
         }
 
@@ -35,7 +37,7 @@ namespace MathAbstractions{
         /// </summary>
         /// <param name="expression">The expression to parse</param>
         /// <param name="expected">The expected result</param>
-        static void PerformTest(string expression, float expected){
+        static void __PerformTest__(string expression, float expected){
 
             Tree testTree = new Tree(expression, true); // Expect 9
 
@@ -60,14 +62,18 @@ namespace MathAbstractions{
 
             int positionOffset = 0;
 
+            List<string> higherOperations = new List<string>{
+                "*", "/"
+            };
+
             for (int i = 0 ; i < components.Count - 1 ; i+=2){
 
-                if (components[i + 1] == "*" || components[i + 1] == "/" || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
+                if (higherOperations.Contains(components[i + 1]) || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
 
                     currentBranch = new Branch(components[i + 1], components[i + 2]);
 
                 }
-                else if (components[i + 3] == "*" || components[i + 3] == "/"){ // If the next operation is to be executed before the current
+                else if (higherOperations.Contains(components[i + 3])){ // If the next operation is to be executed before the current
 
                     Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]); // Create a branch encasing the next operation
 
@@ -231,6 +237,10 @@ namespace MathAbstractions{
 
                 case "/":
                     return Operation.DIVIDE;
+                
+                case "-inv":
+                    this.inverse = true;
+                    return Operation.SUBTRACT;
 
             }
 

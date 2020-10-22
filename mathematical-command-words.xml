@@ -9,7 +9,7 @@
         <word>subtract</word>
         <word>minus</word>
         <word>less</word>
-        <word inverse-args="true">less than</word>
+        <word append="inv">less than</word>
         <word>take</word>
     </subtraction>
     <multiplication symbol="*">
