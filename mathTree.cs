@@ -30,6 +30,16 @@ namespace MathsAbstractions{
 
             __PerformTest__("3 -inv 6", 3);
 
+            __PerformTest__("2 * ( 3 + 5 )", 16);
+
+            __PerformTest__("3 * ( 2 * ( 3 + 5 ) )", 48);
+
+            __PerformTest__("2 * ( 6 / ( 1 + ( 4 / 2 ) ) )", 4);
+
+            __PerformTest__("3 * ( 4 / 2 ) - 1", 5);
+
+            __PerformTest__("2 * ( 3 * ( 1 + 1 ) - 2 )", 8);
+
         }
 
         /// <summary>
@@ -60,37 +70,105 @@ namespace MathsAbstractions{
 
             Branch currentBranch = null;
 
-            int positionOffset = 0;
+            List<(Branch, string, string)> bracketBuffer = new List<(Branch, string, string)>();
 
             List<string> higherOperations = new List<string>{
                 "*", "/"
             };
 
+            (string, string) bracketLeftOperation = (null, null);
+
+            int positionOffset = 0;
+
             for (int i = 0 ; i < components.Count - 1 ; i+=2){
 
-                if (higherOperations.Contains(components[i + 1]) || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
+                if (components[i + 1] == ")"){
 
-                    currentBranch = new Branch(components[i + 1], components[i + 2]);
+                    currentBranch = leftBranch;
 
-                }
-                else if (higherOperations.Contains(components[i + 3])){ // If the next operation is to be executed before the current
+                    leftBranch = bracketBuffer[bracketBuffer.Count - 1].Item1;
 
-                    Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]); // Create a branch encasing the next operation
+                    (_, string operation, string operand) = bracketBuffer[bracketBuffer.Count - 1];
 
-                    currentBranch = new Branch(components[i + 1], tempBranch);
+                    bracketLeftOperation = (operation, operand);
 
-                    positionOffset = 2; // Skip the operation just encased
+                    bracketBuffer.RemoveAt(bracketBuffer.Count - 1);
+
+                    i++;
+
+                    positionOffset = -2;
 
                 }
                 else{
-                    
-                    currentBranch = new Branch(components[i + 1], components[i + 2]);
+
+                    if (components[i] == "("){
+
+                        (Branch, string, string) bracket = (leftBranch, null, null); // Left branch, operation, operand
+
+                        if (leftBranch == null && i - 2 >= 0){
+
+                            bracket = (null, components[i - 1], components[i - 2]);
+
+                        }
+
+                        bracketBuffer.Add(bracket);
+
+                        leftBranch = null;
+
+                        i++;
+
+                    }
+
+                    if (components.Count - 3 >= i){
+
+                        if (components[i + 2] == "("){
+
+                            continue;
+
+                        }
+                        
+                    }
+
+                    if (higherOperations.Contains(components[i + 1]) || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
+
+                        currentBranch = new Branch(components[i + 1], components[i + 2]);
+
+                    }
+                    else if (higherOperations.Contains(components[i + 3])){ // If the next operation is to be executed before the current
+
+                        Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]); // Create a branch encasing the next operation
+
+                        currentBranch = new Branch(components[i + 1], tempBranch);
+
+                        positionOffset = 2; // Skip the operation just encased
+
+                    }
+                    else{
+                        
+                        currentBranch = new Branch(components[i + 1], components[i + 2]);
+
+                    }
 
                 }
 
                 if (leftBranch == null){
 
-                    currentBranch.left = float.Parse(components[i]); // Current branch acts as the initial starting point
+                    if (bracketLeftOperation.Item2 == null){
+
+                        currentBranch.left = float.Parse(components[i]); // Current branch acts as the initial starting point
+
+                    }
+                    else{
+
+                        leftBranch = new Branch(bracketLeftOperation.Item1, currentBranch);
+
+                        leftBranch.left = float.Parse(bracketLeftOperation.Item2);
+
+                        currentBranch = leftBranch;
+
+                        bracketLeftOperation = (null, null);
+
+                    }
 
                 }
                 else{
@@ -244,7 +322,7 @@ namespace MathsAbstractions{
 
             }
 
-            return Operation.ADD;
+            throw new Exception($"Unexpected or unimplemented operation {operation}");
 
         }
 

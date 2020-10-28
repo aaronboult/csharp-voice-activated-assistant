@@ -1,4 +1,10 @@
 <xml version="1.0" encoding="utf-8" standalone="yes">
+    <open-bracket symbol="(">
+        <word>open bracket</word>
+    </open-bracket>
+    <close-bracket symbol=")">
+        <word>close bracket</word>
+    </close-bracket>
     <addition symbol="+">
         <word>add</word>
         <word>plus</word>

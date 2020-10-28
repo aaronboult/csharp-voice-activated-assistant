@@ -7,9 +7,9 @@ namespace Control
 
         static void Main(string[] args){
 
-            Command.__TestExpressionParser__();
+            // Command.__TestExpressionParser__();
 
-            // Tree.__Test__();
+            Tree.__Test__();
 
         }
 
