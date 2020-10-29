@@ -10,15 +10,17 @@ namespace Control{
 
         public static void __TestExpressionParser__(){
 
-            __TestExpression__("5 add 6", 11);
+            // __TestExpression__("5 add 6", 11);
 
-            __TestExpression__("6 over 2", 3);
+            // __TestExpression__("6 over 2", 3);
 
-            __TestExpression__("8 lots of 3", 24);
+            // __TestExpression__("8 lots of 3", 24);
 
-            __TestExpression__("400 times 200", 80_000);
+            // __TestExpression__("400 times 200", 80_000);
 
-            __TestExpression__("8 more than 4 over 2 take 5", 5);
+            // __TestExpression__("8 more than 4 over 2 take 5", 5);
+
+            __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
 
         }
 
@@ -108,13 +110,21 @@ namespace Control{
 
             bool previousWasNumber = false;
 
-            string previousKeywordBuffer = "";
+            List<string> previousKeywordBuffer = new List<string>(){ "" };
+
+            string keywordFirstWord = "";
 
             string symbolToAppend = "";
 
             foreach(string value in commandComponents){
 
                 if (IsNumerical(value)){
+
+                    if (symbolToAppend != ""){
+
+                        symbolToAppend += " ";
+
+                    }
 
                     equation += symbolToAppend;
 
@@ -128,42 +138,65 @@ namespace Control{
 
                     previousWasNumber = true;
 
-                    previousKeywordBuffer = "";
+                    previousKeywordBuffer = new List<string>();
 
                     equation += value;
 
                 }
                 else{
 
-                    if (previousKeywordBuffer != ""){
+                    previousKeywordBuffer.Add(value);
 
-                        previousKeywordBuffer += " ";
+                    for (int i = 0 ; i < previousKeywordBuffer.Count ; i++){
+
+                        if (previousKeywordBuffer[i] != value){
+
+                            previousKeywordBuffer[i] += $" {value}";
+
+                        }
+
+                        (bool isKeyword, string operation, string matchedKeyword) keyword = IsKeyword(commandWords, previousKeywordBuffer[i]);
+
+                        if (keyword.isKeyword){
+
+                            previousWasNumber = false;
+
+                            Console.WriteLine($"Matched keyword: {keyword.matchedKeyword}");
+                            Console.WriteLine(
+                                $"Matched keyword first word: {keyword.matchedKeyword.Split(" "[0])[0]}"
+                            );
+
+                            string firstWord = keyword.matchedKeyword.Split(" "[0])[0];
+
+                            if (keywordFirstWord != firstWord){
+
+                                equation += $"{symbolToAppend}";
+
+                            }
+                            
+                            symbolToAppend = $" {keyword.operation}";
+
+                            keywordFirstWord = firstWord;
+
+                        }
 
                     }
 
-                    previousKeywordBuffer = previousKeywordBuffer + value;
-
-                    (bool isKeyword, string operation) keyword = IsKeyword(commandWords, previousKeywordBuffer);
-
-                    if (keyword.isKeyword){
-
-                        previousWasNumber = false;
-
-                        symbolToAppend = $" {keyword.operation} ";
-
-                    }
+                    Console.WriteLine($"Current equation: {equation}");
 
                 }
 
             }
 
-            Console.WriteLine(equation);
+            equation += symbolToAppend;
+
+            Console.WriteLine($"Equation: {equation}");
 
             return (true, equation);
 
         }
 
-        static (bool, string) IsKeyword(XmlDocument lookup, string value){
+        static (bool, string, string) IsKeyword(XmlDocument lookup, string value){
 
             XmlNode firstChild = lookup.FirstChild;
 
@@ -187,7 +220,7 @@ namespace Control{
 
                         }
 
-                        return (true, symbol);
+                        return (true, symbol, keyword.InnerXml);
 
                     }
 
@@ -195,7 +228,7 @@ namespace Control{
 
             }
 
-            return (false, null);
+            return (false, null, null);
 
         }
 

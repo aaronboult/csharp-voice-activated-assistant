@@ -322,7 +322,7 @@ namespace MathsAbstractions{
 
             }
 
-            throw new Exception($"Unexpected or unimplemented operation {operation}");
+            throw new Exception($"Unexpected or unimplemented operation: {operation}");
 
         }
 
