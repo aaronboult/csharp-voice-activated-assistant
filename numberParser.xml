@@ -1,0 +1,49 @@
+<xml version="1.0" encoding="utf-8" standalone="yes">
+    <numbers>
+        <item name="a" value="1" />
+        <item name="zero" value="0" />
+        <item name="one" value="1" />
+        <item name="two" value="2" />
+        <item name="three" value="3" />
+        <item name="four" value="4" />
+        <item name="five" value="5" />
+        <item name="six" value="6" />
+        <item name="seven" value="7" />
+        <item name="eight" value="8" />
+        <item name="nine" value="9" />
+        <item name="ten" value="10" />
+        <item name="eleven" value="11" />
+        <item name="twelve" value="12" />
+        <item name="thirteen" value="13" />
+        <item name="fourteen" value="14" />
+        <item name="fifteen" value="15" />
+        <item name="sixteen" value="16" />
+        <item name="seventeen" value="17" />
+        <item name="eighteen" value="18" />
+        <item name="nineteen" value="19" />
+    </numbers>
+    <tens>
+        <item name="twenty" value="20" />
+        <item name="thirty" value="30" />
+        <item name="forty" value="40" />
+        <item name="fifty" value="50" />
+        <item name="sixty" value="60" />
+        <item name="seventy" value="70" />
+        <item name="eighty" value="80" />
+        <item name="ninety" value="90" />
+    </tens>
+    <places>
+        <item name="hundred" value="100" />
+        <item name="thousand" value="1000" />
+        <item name="million" value="1000000" />
+        <item name="billion" value="1000000000" />
+        <item name="trillion" value="100000000000" />
+    </places>
+    <connectors>
+        <item name="and" />
+    </connectors>
+    <commands>
+        <item name="point" value="0" />
+        <item name="dot" value="0" />
+    </commands>
+</xml>

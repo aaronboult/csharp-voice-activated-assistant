@@ -20,13 +20,13 @@ namespace Control{
 
             // __TestExpression__("8 more than 4 over 2 take 5", 5);
 
-            __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
+            // __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
 
         }
 
-        static void __TestExpression__(string expression, float expected){
+        static void __TestExpression__(string expression, double expected, bool debug = false){
 
-            Command command = new Command(expression);
+            Command command = new Command(expression, debug);
 
             command.Parse();
 
@@ -34,7 +34,7 @@ namespace Control{
 
         }
 
-        public float numericalOutput;
+        public double numericalOutput;
 
         public OutputType type;
 
@@ -46,13 +46,17 @@ namespace Control{
 
         bool parsed = false;
 
+        bool debug;
+
         /// <summary>
         /// Constructor for Command
         /// </summary>
         /// <param name="command">The command to carry out</param>
-        public Command(string command){
+        public Command(string command, bool debug = false){
 
             this.command = command;
+
+            this.debug = debug;
 
         }
 
@@ -70,10 +74,10 @@ namespace Control{
             parsed = true;
 
             (bool success, string expression) mathsExpression = this.TryConstructMathsExpression();
-
+            
             if (mathsExpression.success){
 
-                Tree tree = new Tree(mathsExpression.expression, true);
+                Tree tree = new Tree(mathsExpression.expression, this.debug);
 
                 this.numericalOutput = tree.Calculate();
                 
@@ -155,18 +159,13 @@ namespace Control{
 
                         }
 
-                        (bool isKeyword, string operation, string matchedKeyword) keyword = IsKeyword(commandWords, previousKeywordBuffer[i]);
+                        (bool isKeyword, string operation, string matchedKeyword) keyword = IsKeyword(ref commandWords, previousKeywordBuffer[i]);
 
                         if (keyword.isKeyword){
 
                             previousWasNumber = false;
 
-                            Console.WriteLine($"Matched keyword: {keyword.matchedKeyword}");
-                            Console.WriteLine(
-                                $"Matched keyword first word: {keyword.matchedKeyword.Split(" "[0])[0]}"
-                            );
-
-                            string firstWord = keyword.matchedKeyword.Split(" "[0])[0];
+                            string firstWord = keyword.matchedKeyword.Split(' ')[0];
 
                             if (keywordFirstWord != firstWord){
 
@@ -182,8 +181,6 @@ namespace Control{
 
                     }
 
-                    Console.WriteLine($"Current equation: {equation}");
-
                 }
 
             }
@@ -196,7 +193,7 @@ namespace Control{
 
         }
 
-        static (bool, string, string) IsKeyword(XmlDocument lookup, string value){
+        static (bool, string, string) IsKeyword(ref XmlDocument lookup, string value){
 
             XmlNode firstChild = lookup.FirstChild;
 
@@ -205,7 +202,7 @@ namespace Control{
                 foreach (XmlNode keyword in group.ChildNodes){
 
                     if (value == keyword.InnerXml){
-
+                        
                         if (group.Attributes["symbol"] == null){
 
                             throw new Exception($"XML lookup group missing symbol attribute at: {lookup.Name}");
@@ -219,6 +216,10 @@ namespace Control{
                             symbol += keyword.Attributes["append"].Value;
 
                         }
+
+                        symbol += $"_{group.Attributes["priority"].Value}";
+
+                        symbol += $"_{group.Attributes["operandIdentifier"].Value}";
 
                         return (true, symbol, keyword.InnerXml);
 
@@ -234,7 +235,7 @@ namespace Control{
 
         static bool IsNumerical(string value){
 
-            return float.TryParse(value, out _);
+            return double.TryParse(value, out _);
 
         }
 

@@ -1,29 +1,41 @@
 <xml version="1.0" encoding="utf-8" standalone="yes">
-    <open-bracket symbol="(">
+<!--
+    operandIdentifier:
+        0 - left and right
+        1 - left
+        2 - right
+        3 - symbol
+        4 - wrapper
+    priority:
+        0 - highest (brackets)
+        ...
+        3 - lowest (add, subtract)
+-->
+    <open-bracket symbol="(" priority="3" operandIdentifier="4">
         <word>open bracket</word>
     </open-bracket>
-    <close-bracket symbol=")">
+    <close-bracket symbol=")" priority="3" operandIdentifier="5">
         <word>close bracket</word>
     </close-bracket>
-    <addition symbol="+">
+    <addition symbol="+" priority="0" operandIdentifier="0">
         <word>add</word>
         <word>plus</word>
         <word>and</word>
         <word>more than</word>
     </addition>
-    <subtraction symbol="-">
+    <subtraction symbol="-" priority="0" operandIdentifier="0">
         <word>subtract</word>
         <word>minus</word>
         <word>less</word>
         <word append="inv">less than</word>
         <word>take</word>
     </subtraction>
-    <multiplication symbol="*">
+    <multiplication symbol="*" priority="1" operandIdentifier="0">
         <word>times</word>
         <word>multiplied by</word>
         <word>lots of</word>
     </multiplication>
-    <division symbol="/">
+    <division symbol="/" priority="1" operandIdentifier="0">
         <word>divided by</word>
         <word>over</word>
         <word>by</word>

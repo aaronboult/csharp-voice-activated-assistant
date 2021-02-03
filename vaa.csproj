@@ -1,0 +1,12 @@
+<Project DefaultTargets="Compile" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup>
+    <CSFile Include="*.cs" />
+    <References Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Speech.dll" />
+</ItemGroup>
+<PropertyGroup>
+    <LangVersion>latest</LangVersion>
+</PropertyGroup>
+<Target Name="Compile">
+    <Csc Sources="@(CSFile)" References="@(References)" OutputAssembly="main.exe" TargetType="exe"></Csc>
+</Target>
+</Project>

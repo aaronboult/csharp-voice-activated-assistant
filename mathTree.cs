@@ -9,36 +9,46 @@ namespace MathsAbstractions{
     /// </summary>
     public class Tree{
 
-        Branch entry;
+        private bool debug = false;
 
-        bool debug = false;
+        private List<Operation> expression;
+
+        private int entryIndex = 0;
 
         /// <summary>
         /// Perform tests to check whether the parser is working properly
         /// </summary>
-        public static void __Test__(){
+        public static void __TestTreeConstructor__(){
 
-            __PerformTest__("5 + 5", 10);
+            // __PerformTest__("5 +_0_0 5", 10); // 5 + 5
 
-            __PerformTest__("3 * 3 - 2 * 4", 1);
+            // __PerformTest__("3 *_1_0 3 -_0_0 2 *_1_0 4", 1); // 3 * 3 - 2 * 4 <---- stackoverflow exception
 
-            __PerformTest__("9 - 8 * 7 + 6 / 2", -44);
+            // __PerformTest__("9 -_0_0 8 *_1_0 7 +_0_0 6 /_1_0 2", -44); // 9 - 8 * 7 + 6 / 2
 
-            __PerformTest__("2 * 3 * 4 * 5 * 6 * 7", 5040);
+            // __PerformTest__("2 *_1_0 3 *_1_0 4 *_1_0 5 *_1_0 6 *_1_0 7", 5040); // 2 * 3 * 4 * 5 * 6 * 7
 
-            __PerformTest__("-6 + 3", -3);
+            // __PerformTest__("10 -_0_0 1 *_1_0 2 *_1_0 3 +_0_0 20", 24);
 
-            __PerformTest__("3 -inv 6", 3);
+            // __PerformTest__("-6 +_0_0 3", -3); // -6 + 3
 
-            __PerformTest__("2 * ( 3 + 5 )", 16);
+            // __PerformTest__("3 -inv_3_0 6", 3); // 6 - 3
 
-            __PerformTest__("3 * ( 2 * ( 3 + 5 ) )", 48);
+            // __PerformTest__("2 *_1_0 (_3_4 3 +_0_0 5 )_3_5", 16); // 2 * ( 3 + 5 )
 
-            __PerformTest__("2 * ( 6 / ( 1 + ( 4 / 2 ) ) )", 4);
+            // __PerformTest__("2 *_1_0 (_3_4 1 +_0_0 2 )_3_5 +_0_0 1", 7); // 2 * ( 1 + 2 ) + 1
 
-            __PerformTest__("3 * ( 4 / 2 ) - 1", 5);
+            // __PerformTest__("2 *_1_0 (_3_4 1 +_0_0 2 *_1_0 4 )_3_5 +_0_0 7", 18 + 7); // 2 * ( 1 + 2 * 4 )
 
-            __PerformTest__("2 * ( 3 * ( 1 + 1 ) - 2 )", 8);
+            // __PerformTest__("3 *_1_0 (_3_4 2 *_1_0 (_3_4 3 +_0_0 5 )_3_5 )_3_5", 48); // 3 * ( 2 * ( 3 + 5 ) )
+
+            // __PerformTest__("2 *_1_0 (_3_4 6 /_1_0 (_3_4 1 +_0_0 (_3_4 4 /_1_0 2 )_3_5 )_3_5 )_3_5", 4); // 2 * ( 6 / ( 1 + ( 4 / 2 ) ) )
+
+            // __PerformTest__("3 *_1_0 (_3_4 4 /_1_0 2 )_3_5 -_0_0 1", 5); // 3 * ( 4 / 2 ) - 1
+
+            // __PerformTest__("2 *_1_0 (_3_4 3 *_1_0 (_3_4 1 +_0_0 1 )_3_5 -_0_0 2 )_3_5", 8); // 2 * ( 3 * ( 1 + 1 ) - 2 )
+
+            // __PerformTest__("1 +_0_0 3 ^_2_0 2", 10);
 
         }
 
@@ -47,9 +57,9 @@ namespace MathsAbstractions{
         /// </summary>
         /// <param name="expression">The expression to parse</param>
         /// <param name="expected">The expected result</param>
-        static void __PerformTest__(string expression, float expected){
+        static void __PerformTest__(string expression, double expected, bool debug = false){
 
-            Tree testTree = new Tree(expression, true); // Expect 9
+            Tree testTree = new Tree(expression, debug); // Expect 9
 
             Console.WriteLine($"Expression {expression} Passed: {(testTree.Calculate() == expected)}\n\n");
 
@@ -64,128 +74,226 @@ namespace MathsAbstractions{
 
             this.debug = debug;
 
-            List<string> components = equation.Split(" "[0]).ToList(); // Equation should be in the format: [operand, operator, operand, operator, operand...]
+            Operation.debug = debug;
 
-            Branch leftBranch = null;
+            string[] components = equation.Split(' ');
 
-            Branch currentBranch = null;
+            int[] operationIndexs = ProfileOperators(ref components);
 
-            List<(Branch, string, string)> bracketBuffer = new List<(Branch, string, string)>();
+            Stack<(int, int)> bracketQueue = new Stack<(int, int)>();
 
-            List<string> higherOperations = new List<string>{
-                "*", "/"
-            };
+            List<int> operatorsToRemove = new List<int>();
 
-            (string, string) bracketLeftOperation = (null, null);
+            Stack<string> operands = new Stack<string>();
 
-            int positionOffset = 0;
+            for (int i = components.Length - 1 ; i >= 0 ; i--){ // Work backwards due to first in, last out
 
-            for (int i = 0 ; i < components.Count - 1 ; i+=2){
+                if (Array.IndexOf(operationIndexs, i) == -1){
 
-                if (components[i + 1] == ")"){
-
-                    currentBranch = leftBranch;
-
-                    leftBranch = bracketBuffer[bracketBuffer.Count - 1].Item1;
-
-                    (_, string operation, string operand) = bracketBuffer[bracketBuffer.Count - 1];
-
-                    bracketLeftOperation = (operation, operand);
-
-                    bracketBuffer.RemoveAt(bracketBuffer.Count - 1);
-
-                    i++;
-
-                    positionOffset = -2;
-
-                }
-                else{
-
-                    if (components[i] == "("){
-
-                        (Branch, string, string) bracket = (leftBranch, null, null); // Left branch, operation, operand
-
-                        if (leftBranch == null && i - 2 >= 0){
-
-                            bracket = (null, components[i - 1], components[i - 2]);
-
-                        }
-
-                        bracketBuffer.Add(bracket);
-
-                        leftBranch = null;
-
-                        i++;
+                    if (debug){
+                        
+                        Console.WriteLine($"Pushing {components[i]} to operand stack");
 
                     }
 
-                    if (components.Count - 3 >= i){
+                    operands.Push(components[i]);
 
-                        if (components[i + 2] == "("){
+                }
+
+            }
+
+            bool settingLeft = true;
+
+            int rightConsumerIndex = -1; // -1 denotes there is no set rightConsumer
+
+            for (int i = 0 ; i < expression.Count ; i++){
+
+                if (debug){
+
+                    for (int o = 0 ; o < expression.Count ; o++){
+
+                        Console.WriteLine(expression[o].ToString());
+                        Console.WriteLine("\n");
+
+                    }
+
+                    Console.WriteLine("\n\n\n\n");
+
+                }
+
+                if (expression[i].operandData == Operation.OperatorInfo.BRACKETOPEN){
+
+                    bracketQueue.Push((i, rightConsumerIndex));
+
+                    rightConsumerIndex = -1;
+
+                    settingLeft = true;
+
+                    if (expression.Count - 1 > i){
+
+                        expression[bracketQueue.Peek().Item1].right = new Operation.Operand(expression[i + 1]);
+
+                    }
+
+                    continue;
+
+                }
+                else if (expression[i].operandData == Operation.OperatorInfo.BRACKETCLOSE){
+
+                    rightConsumerIndex = bracketQueue.Pop().Item2;
+
+                    operatorsToRemove.Add(i);
+
+                    settingLeft = false;
+
+                    if (expression.Count - 1 > i){
+
+                        expression[i + 1].left = new Operation.Operand(expression[rightConsumerIndex]);
+                        
+                        if (bracketQueue.Count > 0){
+
+                            expression[bracketQueue.Peek().Item1].right = new Operation.Operand(expression[i + 1]);
+
+                        }
+
+                    }
+
+                    continue;
+
+                }
+
+                if (settingLeft){
+
+                    expression[i].left = new Operation.Operand(operands.Pop());
+
+                }
+
+                settingLeft = true;
+
+                if (expression.Count - 1 > i){
+
+                    if (expression[i].priority >= expression[i + 1].priority){ // Consume as many operands as needed; assign self to next's left
+
+                        if (rightConsumerIndex < 0 || expression[i].priority == expression[i + 1].priority){
+
+                            expression[i + 1].left = new Operation.Operand(expression[i]);
+
+                            if (rightConsumerIndex >= 0){ // If there is a rightConsumer set, update where it's right reference points to
+
+                                expression[rightConsumerIndex].right = new Operation.Operand(expression[i + 1]);
+
+                            }
+
+                        }
+                        else{
+
+                            expression[i + 1].left = new Operation.Operand(expression[rightConsumerIndex]);
+
+                            rightConsumerIndex = -1;
+
+                        }
+
+                        settingLeft = false;
+
+                    }
+                    else{
+                        
+                        if (expression[i + 1].operandData != Operation.OperatorInfo.BRACKETCLOSE){
+
+                            expression[i].right = new Operation.Operand(expression[i + 1]);
+
+                            rightConsumerIndex = i;
 
                             continue;
 
                         }
-                        
-                    }
-
-                    if (higherOperations.Contains(components[i + 1]) || components.Count - 3 <= i){ // If the operator is either a higher order operator or the end has been reached
-
-                        currentBranch = new Branch(components[i + 1], components[i + 2]);
-
-                    }
-                    else if (higherOperations.Contains(components[i + 3])){ // If the next operation is to be executed before the current
-
-                        Branch tempBranch = new Branch(components[i + 3], components[i + 2], components[i + 4]); // Create a branch encasing the next operation
-
-                        currentBranch = new Branch(components[i + 1], tempBranch);
-
-                        positionOffset = 2; // Skip the operation just encased
-
-                    }
-                    else{
-                        
-                        currentBranch = new Branch(components[i + 1], components[i + 2]);
 
                     }
 
                 }
+                else if (rightConsumerIndex >= 0){
 
-                if (leftBranch == null){
+                    if (expression[rightConsumerIndex].priority >= expression[i].priority){
 
-                    if (bracketLeftOperation.Item2 == null){
-
-                        currentBranch.left = float.Parse(components[i]); // Current branch acts as the initial starting point
+                        expression[i].left = new Operation.Operand(expression[rightConsumerIndex]);
 
                     }
                     else{
 
-                        leftBranch = new Branch(bracketLeftOperation.Item1, currentBranch);
+                        expression[i].right = new Operation.Operand(operands.Pop());
 
-                        leftBranch.left = float.Parse(bracketLeftOperation.Item2);
+                    }
 
-                        currentBranch = leftBranch;
+                    rightConsumerIndex = -1;
 
-                        bracketLeftOperation = (null, null);
+                    if (operands.Count == 0){
+                        
+                        if (debug){
+                            
+                            Console.WriteLine("No more operands");
+
+                        }
+
+                        continue;
 
                     }
 
                 }
-                else{
-                    
-                    currentBranch.leftPointer = leftBranch; // Point the input of the left side of the current expression to the output of the previous expression
 
-                }
+                expression[i].right = new Operation.Operand(operands.Pop());
 
-                leftBranch = currentBranch;
+            }
+            
+            for (int i = operatorsToRemove.Count - 1 ; i >= 0 ; i--){
                 
-                i += positionOffset;
-
-                positionOffset = 0;
+                expression.RemoveAt(operatorsToRemove[i]);
 
             }
 
-            this.entry = currentBranch;
+            // Locate the expression that is able to reference all child nodes
+            for (int i = 0 ; i < expression.Count ; i++){
+
+                if (debug){
+
+                    Console.WriteLine(expression[i].ToString());
+
+                    Console.WriteLine($"Comparing Count: {expression.Count} with CountedRefs: {expression[i].CountOperandReferences()}\n------------------------------------");
+
+                }
+
+                if (expression[i].CountOperandReferences() == expression.Count){
+
+                    entryIndex = i;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+        private int[] ProfileOperators(ref string[] components){
+
+            expression = new List<Operation>();
+
+            List<int> operationIndexBuffer = new List<int>();
+
+            for (int i = 0 ; i < components.Length ; i++){
+
+                if (!double.TryParse(components[i], out _)){ // If parsing fails, the value is an operator
+
+                    operationIndexBuffer.Add(i);
+
+                    expression.Add(
+                        new Operation(components[i])
+                    );
+
+                }
+
+            }
+
+            return operationIndexBuffer.ToArray();
 
         }
 
@@ -193,13 +301,23 @@ namespace MathsAbstractions{
         /// Calculate the value from the parsed expression
         /// </summary>
         /// <returns>The value of the expression</returns>
-        public float Calculate(){
+        public double Calculate(){
 
-            float value = this.entry.Calculate(this.debug);
+            if (debug){
 
-            Console.WriteLine(
-                $"{value}"
-            );
+                Console.WriteLine("\n\n\nCalculating:\n");
+
+            }
+
+            double value = expression[entryIndex].Calculate();
+
+            if (debug){
+
+                Console.WriteLine(
+                    $"Entry at: {entryIndex}\nValue: {value}"
+                );
+
+            }
 
             return value;
 
@@ -207,178 +325,233 @@ namespace MathsAbstractions{
 
     }
 
-    /// <summary>
-    /// A single branch expression that applies a certain operation to a left and right value
-    /// </summary>
-    class Branch{
+    class Operation{
 
-        public float value;
-        public bool calculated = false; // Used to avoid unnecessary recalculations
+        public readonly byte priority;
 
-        public float left;
+        public Operand left;
+        public Operand right;
 
-        Branch _leftPointer = null;
-        public Branch leftPointer{
+        public readonly OperatorInfo operandData;
 
+        private bool hasLeft
+        {
             get{
-                return _leftPointer;
+                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.LEFT;
             }
-
-            set{
-                _leftPointer = _leftPointer == null ? value : _leftPointer; // Preent the pointer being overwritten
-            }
-
         }
 
-        public float right;
-        
-        Branch _rightPointer = null;
-        public Branch rightPointer{
-
+        private bool hasRight
+        {
             get{
-                return _rightPointer;
+                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.RIGHT || operandData == OperatorInfo.BRACKETOPEN;
+            }
+        }
+
+        private readonly int opcode;
+
+        public static bool debug;
+
+        /*
+            operandIdentifier:
+                0 - left and right
+                1 - left
+                2 - right
+                3 - symbol
+                4 - wrapper
+            priority:
+                0 - lowest (add, subtract)
+                ...
+                3 - highest (brackets)
+        */
+
+        public Operation(string operation){
+
+            string[] operationComponents = operation.Split('_'); // 0: symbol, 1: priority, 2: operand info
+
+            priority = byte.Parse(operationComponents[1]);
+
+            switch (operationComponents[2]){ // Operand info
+
+                case "0":
+                    operandData = OperatorInfo.LEFTRIGHT;
+                    break;
+                
+                case "1":
+                    operandData = OperatorInfo.LEFT;
+                    break;
+                
+                case "2":
+                    operandData = OperatorInfo.RIGHT;
+                    break;
+
+                case "3":
+                    operandData = OperatorInfo.FUNCTION;
+                    break;
+                
+                case "4":
+                    operandData = OperatorInfo.BRACKETOPEN;
+                    break;
+                
+                case "5":
+                    operandData = OperatorInfo.BRACKETCLOSE;
+                    return;
+                
+                case "6":
+                    operandData = OperatorInfo.CONSTANT;
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid operational quantities");
+
             }
 
-            set{
-                _rightPointer = _rightPointer == null ? value : _rightPointer; // Prevent the pointer being overwritten
-            }
-
-        }
-
-        Operation operation;
-        
-        bool inverse = false; // Whether the 'left' expression should be on the left (false) or on the right (true)
-
-        /// <summary>
-        /// Determines the operation to be carried out
-        /// </summary>
-        enum Operation{
-            ADD, SUBTRACT,
-            MULTIPLY, DIVIDE
-        }
-
-        /// <summary>
-        /// Construct a new Branch object
-        /// </summary>
-        /// <param name="operation">The operation to be carried out on the two inputs</param>
-        /// <param name="left">The left side constant of the expression</param>
-        /// <param name="right">The right side constant of the expression</param>
-        public Branch(string operation, string left, string right) : this(operation, right){
-
-            this.left = float.Parse(left);
-
-        }
-
-        /// <summary>
-        /// Constructs a new Branch object
-        /// </summary>
-        /// <param name="operation">The operation to be carried out on the two inputs</param>
-        /// <param name="right">The right side constant of the expression</param>
-        public Branch(string operation, string right){
-
-            this.operation = GetOperation(operation);
-
-            this.right = float.Parse(right);
-
-        }
-
-        /// <summary>
-        /// Constructs a new Branch object
-        /// </summary>
-        /// <param name="operation">The operation to be carried out on the two inputs</param>
-        /// <param name="right">An instance of a Branch with both left and right sides of the expression set</param>
-        public Branch(string operation, Branch right){
-
-            this.operation = GetOperation(operation);
-
-            this.rightPointer = right;
-
-        }
-
-        /// <summary>
-        /// Get an operation enumerable from a string
-        /// </summary>
-        /// <param name="operation">The operation to be carried out</param>
-        /// <returns>An operation enumerable representing the operation to be carried out</returns>
-        Operation GetOperation(string operation){
-
-            switch (operation){
-
+            switch (operationComponents[0]){
+            
                 case "+":
-                    return Operation.ADD;
-                
+                    opcode = 0x00;
+                    break;
+            
                 case "-":
-                    return Operation.SUBTRACT;
-                
-                case "*":
-                    return Operation.MULTIPLY;
-
-                case "/":
-                    return Operation.DIVIDE;
-                
+                    opcode = 0x01;
+                    break;
+            
                 case "-inv":
-                    this.inverse = true;
-                    return Operation.SUBTRACT;
+                    opcode = 0x02;
+                    break;
+            
+                case "*":
+                    opcode = 0x03;
+                    break;
+            
+                case "/":
+                    opcode = 0x04;
+                    break;
+                
+                // Close bracket not implemented as it is simply a marker
+                case "(":
+                    opcode = 0x05;
+                    break;
+                
+                case "^":
+                    opcode = 0x06;
+                    break;
+
+                default:
+                    throw new ArgumentException("The given operation is not implemented");
 
             }
-
-            throw new Exception($"Unexpected or unimplemented operation: {operation}");
 
         }
 
-        /// <summary>
-        /// Calculate the value of the expression
-        /// </summary>
-        /// <param name="debug">Whether or not to show debug information</param>
-        /// <returns>The value of the expression calculated</returns>
-        public float Calculate(bool debug = false){
+        public int CountOperandReferences(){
 
-            if (this.calculated){
+            int references = 1; // Start with 1 to account for itself
 
-                return this.value; // Avoid recalculating the same value
+            if (hasLeft && !left.isConstant){
+
+                references += left.childReferenceCount;
 
             }
-            
-            float leftOperand = this.leftPointer != null 
-                ? this.leftPointer.Calculate(debug) : this.left;
 
-            float rightOperand = this.rightPointer != null 
-                ? this.rightPointer.Calculate(debug) : this.right;
-            
+            if (hasRight && !right.isConstant){
+
+                references += right.childReferenceCount;
+
+            }
+
+            return references;
+
+        }
+
+        public double Calculate(){
+
+            double leftValue = left.value;
+
+            double rightValue = right.value;
+
             if (debug){
-
-                Console.WriteLine($"Using {leftOperand} and left operand.");
                 
-                Console.WriteLine($"Using {rightOperand} and right operand.");
+                Console.WriteLine(this.ToString());
+
+                Console.WriteLine($"Using Opcode: {opcode}\nLeft: {leftValue}\nRight: {rightValue}\n---------------------------------------------------------------------");
 
             }
 
-            switch (this.operation){
+            switch (opcode){
 
-                case Operation.ADD:
-                    this.value = leftOperand + rightOperand;
-                    break;
+                case 0x00: // Add
+                    return leftValue + rightValue;
+
+                case 0x01: // Subtract
+                    return leftValue - rightValue;
+
+                case 0x02: // Subtract Inverted
+                    return rightValue - leftValue;
+
+                case 0x03: // Multiply
+                    return leftValue * rightValue;
+
+                case 0x04: // Divide
+                    return leftValue / rightValue;
                 
-                case Operation.SUBTRACT:
-                    this.value = this.inverse 
-                        ? rightOperand - leftOperand : leftOperand - rightOperand;
-                    break;
+                case 0x05: // Open bracket
+                    return rightValue;
                 
-                case Operation.MULTIPLY:
-                    this.value = leftOperand * rightOperand;
-                    break;
-                
-                case Operation.DIVIDE:
-                    this.value = inverse 
-                        ? rightOperand / leftOperand : leftOperand / rightOperand;
-                    break;
+                case 0x06:
+                    return Math.Pow(leftValue, rightValue);
+
+                default:
+                    throw new ArgumentException("The given opcode has not yet been implemented.");
 
             }
 
-            this.calculated = true;
+        }
 
-            return this.value;
+        public override string ToString(){
 
+            return $"Priority: {priority}\nHas Left: {hasLeft}\nHas Right: {hasRight}\nOpcode: {opcode}\nLeft Is Constant: {left.isConstant}\nRight Is Constant: {right.isConstant}";
+
+        }
+
+        public enum OperatorInfo{
+            LEFTRIGHT,
+            LEFT,
+            RIGHT,
+            FUNCTION,
+            BRACKETOPEN,
+            BRACKETCLOSE,
+            CONSTANT
+        }
+
+        public readonly struct Operand{
+            private double constantValue { get; }
+            private Operation referenceValue { get; }
+            public double value
+            {
+                get{
+                    if (referenceValue == null)
+                        return constantValue;
+                    return referenceValue.Calculate();
+                }
+            }
+            public bool isConstant{
+                get{
+                    return referenceValue == null;
+                }
+            }
+            public int childReferenceCount
+            {
+                get{
+                    if (!isConstant)
+                        return referenceValue.CountOperandReferences();
+                    return 0; // 1 instead of 0 as the operand itself needs to be counted for
+                }
+            }
+
+            public Operand(string constant) : this() => constantValue = (double)double.Parse(constant);
+
+            public Operand(Operation operationRef) : this() => referenceValue = operationRef;
         }
 
     }
