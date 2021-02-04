@@ -1,5 +1,5 @@
 <xml version="1.0" encoding="utf-8" standalone="yes">
-    <numbers>
+    <numbers name="2">
         <item name="a" value="1" />
         <item name="zero" value="0" />
         <item name="one" value="1" />
@@ -22,7 +22,7 @@
         <item name="eighteen" value="18" />
         <item name="nineteen" value="19" />
     </numbers>
-    <tens>
+    <tens name="1">
         <item name="twenty" value="20" />
         <item name="thirty" value="30" />
         <item name="forty" value="40" />
@@ -32,17 +32,17 @@
         <item name="eighty" value="80" />
         <item name="ninety" value="90" />
     </tens>
-    <places>
+    <places name="0">
         <item name="hundred" value="100" />
         <item name="thousand" value="1000" />
         <item name="million" value="1000000" />
         <item name="billion" value="1000000000" />
         <item name="trillion" value="100000000000" />
     </places>
-    <connectors>
+    <connectors name="3">
         <item name="and" />
     </connectors>
-    <commands>
+    <commands name="4">
         <item name="point" value="0" />
         <item name="dot" value="0" />
     </commands>

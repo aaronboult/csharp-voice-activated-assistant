@@ -1,8 +1,9 @@
 using System;
-using System.IO;
 using System.Xml;
+using System.Linq;
 using System.Collections.Generic;
 using MathsAbstractions;
+using Managers;
 
 namespace Control{
 
@@ -22,31 +23,37 @@ namespace Control{
 
             // __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
 
+            // __TestExpression__("What is 2 plus 3", 5);
+
+            __TestExpression__("What is four plus three", 7);
+
         }
 
         static void __TestExpression__(string expression, double expected, bool debug = false){
 
             Command command = new Command(expression, debug);
 
-            command.Parse();
+            string output = command.Execute();
 
-            Console.WriteLine($"Expression {expression} Passed: {(command.numericalOutput == expected)}\n\n");
+            string expectedOutput = expected.ToString();
+
+            if (!debug){
+
+                expectedOutput = $"The result of {expression} is {expected}";
+
+            }
+
+            Console.WriteLine($"Expression {expression} Passed: {(output == expectedOutput)}\n\n");
 
         }
 
-        public double numericalOutput;
+        private string command;
 
-        public OutputType type;
+        private string parseResult = "That command was not recognised";
 
-        public enum OutputType{
-            STRING, NUMERICAL
-        }
+        private bool parsed = false;
 
-        string command;
-
-        bool parsed = false;
-
-        bool debug;
+        private bool debug;
 
         /// <summary>
         /// Constructor for Command
@@ -63,11 +70,11 @@ namespace Control{
         /// <summary>
         /// Parses the respective command and determines what action to carry out
         /// </summary>
-        public void Parse(){
+        public string Execute(){
 
             if (parsed){
                 
-                return;
+                return parseResult;
 
             }
 
@@ -79,14 +86,23 @@ namespace Control{
 
                 Tree tree = new Tree(mathsExpression.expression, this.debug);
 
-                this.numericalOutput = tree.Calculate();
-                
-                this.type = OutputType.NUMERICAL;
+                double result = tree.Calculate();
 
-                return;
+                if (debug){
+
+                    parseResult = result.ToString();
+
+                }
+                else{
+
+                    parseResult = $"The result of {command} is {result}";
+
+                }
 
             }
-            
+
+            return parseResult;
+
         }
 
         /// <summary>
@@ -95,20 +111,71 @@ namespace Control{
         /// <returns>True if the command is a mathematical operation</returns>
         (bool, string) TryConstructMathsExpression(){
 
-            XmlDocument commandWords = new XmlDocument();
+            XmlDocument commandWords = XmlManager.LoadDocument("mathematical-command-words.xml");
 
-            try{
+            XmlDocument queryIdentifiers = XmlManager.LoadDocument("query-identifiers.xml");
 
-                commandWords.Load("mathematical-command-words.xml");
-                
+            List<string> filteredCommand = NumericalWordParser.ParseAllNumericalWords(this.command).Split(' ').ToList();
+
+            if (debug){
+
+                string output = "[";
+
+                for (int i = 0 ; i < filteredCommand.Count ; i++){
+
+                    output += filteredCommand[i];
+
+                    if (i != filteredCommand.Count - 1){
+
+                        output += ",";
+
+                    }
+
+                }
+
+                output += "]";
+
+                Console.WriteLine(output);
+
             }
-            catch (FileNotFoundException){
 
-                throw new Exception("The mathematical-command-words.xml document is either missing or corrupt.");
+            while (filteredCommand.Count > 0){
+
+                if (IsQueryIdentifier(filteredCommand[0].ToLower(), ref queryIdentifiers)){
+
+                    filteredCommand.RemoveAt(0);
+
+                    continue;
+
+                }
+
+                break;
 
             }
 
-            string[] commandComponents = this.command.Split(' ');
+            if (debug){
+
+                string output = "[";
+
+                for (int i = 0 ; i < filteredCommand.Count ; i++){
+
+                    output += filteredCommand[i];
+
+                    if (i != filteredCommand.Count - 1){
+
+                        output += ",";
+
+                    }
+
+                }
+
+                output += "]";
+
+                Console.WriteLine(output);
+
+            }
+
+            string[] commandComponents = filteredCommand.ToArray();
 
             string equation = ""; // Construct this whenever a keyword or number is found
 
@@ -195,41 +262,45 @@ namespace Control{
 
         static (bool, string, string) IsKeyword(ref XmlDocument lookup, string value){
 
+            (bool success, XmlNode group, XmlNode keyword) match = XmlManager.HasSecondLevelChild(value, ref lookup);
+
             XmlNode firstChild = lookup.FirstChild;
 
-            foreach (XmlNode group in lookup.FirstChild.ChildNodes){
+            if (match.success){
 
-                foreach (XmlNode keyword in group.ChildNodes){
+                if (value == match.keyword.InnerXml){
+                    
+                    if (match.group.Attributes["symbol"] == null){
 
-                    if (value == keyword.InnerXml){
-                        
-                        if (group.Attributes["symbol"] == null){
-
-                            throw new Exception($"XML lookup group missing symbol attribute at: {lookup.Name}");
-
-                        }
-
-                        string symbol = group.Attributes["symbol"].Value;
-
-                        if (keyword.Attributes["append"] != null){
-
-                            symbol += keyword.Attributes["append"].Value;
-
-                        }
-
-                        symbol += $"_{group.Attributes["priority"].Value}";
-
-                        symbol += $"_{group.Attributes["operandIdentifier"].Value}";
-
-                        return (true, symbol, keyword.InnerXml);
+                        throw new Exception($"XML lookup group missing symbol attribute at: {lookup.Name}");
 
                     }
+
+                    string symbol = match.group.Attributes["symbol"].Value;
+
+                    if (match.keyword.Attributes["append"] != null){
+
+                        symbol += match.keyword.Attributes["append"].Value;
+
+                    }
+
+                    symbol += $"_{match.group.Attributes["priority"].Value}";
+
+                    symbol += $"_{match.group.Attributes["operandIdentifier"].Value}";
+
+                    return (true, symbol, match.keyword.InnerXml);
 
                 }
 
             }
 
             return (false, null, null);
+
+        }
+
+        static bool IsQueryIdentifier(string word, ref XmlDocument lookup){
+
+            return XmlManager.HasSecondLevelChild(word, ref lookup).Item1;
 
         }
 

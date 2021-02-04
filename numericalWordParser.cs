@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Xml;
+using Managers;
 
 namespace MathsAbstractions{
 
@@ -10,18 +10,7 @@ namespace MathsAbstractions{
 
         static NumericalWordParser(){
 
-            map = new XmlDocument();
-
-            try{
-
-                map.Load("numberParser.xml");
-                
-            }
-            catch (FileNotFoundException){
-
-                throw new Exception("The numberParser.xml document is either missing or corrupt.");
-
-            }
+            map = XmlManager.LoadDocument("numberParser.xml");
 
         }
 
@@ -109,6 +98,53 @@ namespace MathsAbstractions{
                 Console.WriteLine($"Phrase: {phrase}, Passed: {result == expected}");
 
             }
+
+        }
+
+        public static string ParseAllNumericalWords(string sentence, bool debug = false){
+
+            string parsedResult = "";
+
+            string[] components = sentence.Split(' ');
+
+            string numbericalPhraseAccumulator = "";
+
+            for (int i = 0 ; i < components.Length ; i++){
+
+                if (IsNumericalWord(components[i])){
+
+                    numbericalPhraseAccumulator += components[i];
+
+                }
+                else{
+
+                    if (numbericalPhraseAccumulator != ""){
+
+                        parsedResult += $" {Parse(numbericalPhraseAccumulator, debug)}";
+
+                        numbericalPhraseAccumulator = "";
+
+                    }
+
+                    parsedResult += $" {components[i]}";
+
+                }
+
+            }
+
+            if (numbericalPhraseAccumulator != ""){
+
+                parsedResult += $" {Parse(numbericalPhraseAccumulator, debug)}";
+
+            }
+
+            return parsedResult;
+
+        }
+
+        private static bool IsNumericalWord(string word){
+
+            return XmlManager.HasSecondLevelChild(word, ref map, "name").Item1;
 
         }
 
@@ -344,70 +380,28 @@ namespace MathsAbstractions{
 
         private static (double, WordGroups) GetMappedWordValue(string word){
 
-            (bool success, double value) match;
+            (bool success, XmlNode group, XmlNode word) match = XmlManager.HasSecondLevelChild(word, ref map, "name");
 
-            if ((match = ContainsWord(word, "connectors")).success){
+            WordGroups matchedGroup = (WordGroups)int.Parse(match.group.Attributes["name"].Value);
 
-                return (0, WordGroups.CONNECTOR);
+            double matchedValue = double.Parse(match.word.Attributes["value"].Value);
 
-            }
-            else if ((match = ContainsWord(word, "places")).success){
+            if (matchedGroup == WordGroups.CONNECTOR || matchedGroup == WordGroups.UNMATCHED){
 
-                return (match.value, WordGroups.PLACE);
-
-            }
-            else if ((match = ContainsWord(word, "tens")).success){
-
-                return (match.value, WordGroups.TENS);
-
-            }
-            else if ((match = ContainsWord(word, "numbers")).success){
-
-                return (match.value, WordGroups.NUMBER);
-
-            }
-            else if ((match = ContainsWord(word, "commands")).success){
-
-                return (match.value, WordGroups.COMMANDS);
+                matchedValue = 0;
 
             }
 
-            return (0, WordGroups.UNMATCHED);
-
-        }
-
-        private static (bool, double) ContainsWord(string word, string groupName){
-
-            XmlNodeList children = map.GetElementsByTagName(groupName).Item(0).ChildNodes;
-
-            for (int i = 0 ; i < children.Count ; i++){
-
-                if (children[i].Attributes["name"].Value == word){
-
-                    double value = 0;
-
-                    if (children[i].Attributes["value"] != null){
-
-                        value = double.Parse(children[i].Attributes["value"].Value);
-
-                    }
-
-                    return (true, value);
-
-                }
-
-            }
-
-            return (false, 0);
+            return (matchedValue, matchedGroup);
 
         }
 
         enum WordGroups{
-            PLACE,
-            TENS,
-            NUMBER,
-            CONNECTOR,
-            COMMANDS,
+            PLACE = 0,
+            TENS = 1,
+            NUMBER = 2,
+            CONNECTOR = 3,
+            COMMANDS = 4,
             UNMATCHED
         }
 

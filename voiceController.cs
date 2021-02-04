@@ -5,9 +5,17 @@ namespace Control{
 
     public class VoiceController{
 
-        public void Listen(){
+        bool debug;
 
-            Console.WriteLine("Starting...");
+        public void Listen(bool debug = false){
+
+            this.debug = debug;
+
+            if (debug){
+
+                Console.WriteLine("Starting...");
+
+            }
 
             // try{
 
@@ -24,7 +32,11 @@ namespace Control{
 
                     recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
-                    Console.WriteLine("Listener up");
+                    if (debug){
+
+                        Console.WriteLine("Listener up");
+
+                    }
 
                     while (true){
 
@@ -45,7 +57,15 @@ namespace Control{
 
         private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e){
 
-            Console.WriteLine($"Recognized: {e.Result.Text}");
+            if (debug){
+
+                Console.WriteLine($"Recognized: {e.Result.Text}");
+
+            }
+
+            Command command = new Command(e.Result.Text, debug);
+
+            command.Execute();
 
         }
 
