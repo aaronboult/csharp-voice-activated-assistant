@@ -9,9 +9,9 @@ namespace Control
 
             Command.__TestExpressionParser__();
 
-            // Tree.__TestTreeConstructor__();
+            Tree.__TestTreeConstructor__();
 
-            // NumericalWordParser.__TestWordParser__();
+            NumericalWordParser.__TestWordParser__();
 
             // VoiceController voice = new VoiceController();
 

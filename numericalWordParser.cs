@@ -384,11 +384,11 @@ namespace MathsAbstractions{
 
             WordGroups matchedGroup = (WordGroups)int.Parse(match.group.Attributes["name"].Value);
 
-            double matchedValue = double.Parse(match.word.Attributes["value"].Value);
+            double matchedValue = 0;
 
-            if (matchedGroup == WordGroups.CONNECTOR || matchedGroup == WordGroups.UNMATCHED){
+            if (matchedGroup != WordGroups.CONNECTOR && matchedGroup != WordGroups.UNMATCHED){
 
-                matchedValue = 0;
+                matchedValue = double.Parse(match.word.Attributes["value"].Value);
 
             }
 

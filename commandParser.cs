@@ -11,19 +11,19 @@ namespace Control{
 
         public static void __TestExpressionParser__(){
 
-            // __TestExpression__("5 add 6", 11);
+            __TestExpression__("5 add 6", 11);
 
-            // __TestExpression__("6 over 2", 3);
+            __TestExpression__("6 over 2", 3);
 
-            // __TestExpression__("8 lots of 3", 24);
+            __TestExpression__("8 lots of 3", 24);
 
-            // __TestExpression__("400 times 200", 80_000);
+            __TestExpression__("400 times 200", 80_000);
 
-            // __TestExpression__("8 more than 4 over 2 take 5", 5);
+            __TestExpression__("8 more than 4 over 2 take 5", 5);
 
-            // __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
+            __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
 
-            // __TestExpression__("What is 2 plus 3", 5);
+            __TestExpression__("What is 2 plus 3", 5);
 
             __TestExpression__("What is four plus three", 7);
 
@@ -43,7 +43,7 @@ namespace Control{
 
             }
 
-            Console.WriteLine($"Expression {expression} Passed: {(output == expectedOutput)}\n\n");
+            Console.WriteLine($"Expression {expression} Passed: {(output == expectedOutput)}");
 
         }
 
@@ -254,7 +254,11 @@ namespace Control{
 
             equation += symbolToAppend;
 
-            Console.WriteLine($"Equation: {equation}");
+            if (debug){
+
+                Console.WriteLine($"Equation: {equation}");
+
+            }
 
             return (true, equation);
 
