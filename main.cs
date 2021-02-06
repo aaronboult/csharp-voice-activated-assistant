@@ -5,17 +5,23 @@ namespace Control
 {
     class Program{
 
-        static void Main(string[] args){
+        private static void Main(string[] args){
 
-            Command.__TestExpressionParser__();
+            // RunTests();
 
-            Tree.__TestTreeConstructor__();
+            VoiceController voice = new VoiceController();
 
-            NumericalWordParser.__TestWordParser__();
+            voice.Listen();
 
-            // VoiceController voice = new VoiceController();
+        }
 
-            // voice.Listen();
+        private static void RunTests(){
+
+            // Command.__TestExpressionParser__();
+
+            // Tree.__TestTreeConstructor__();
+
+            // NumericalWordParser.__TestWordParser__();
 
         }
 

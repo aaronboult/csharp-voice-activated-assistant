@@ -9,23 +9,39 @@ namespace Control{
 
     public class Command{
 
-        public static void __TestExpressionParser__(){
+        public static void __TestExpressionParser__(bool debug = false){
 
-            __TestExpression__("5 add 6", 11);
+            __TestExpression__("5 add 6", 11, debug);
 
-            __TestExpression__("6 over 2", 3);
+            __TestExpression__("6 over 2", 3, debug);
 
-            __TestExpression__("8 lots of 3", 24);
+            __TestExpression__("8 lots of 3", 24, debug);
 
-            __TestExpression__("400 times 200", 80_000);
+            __TestExpression__("400 times 200", 80_000, debug);
 
-            __TestExpression__("8 more than 4 over 2 take 5", 5);
+            __TestExpression__("8 more than 4 over 2 take 5", 5, debug);
 
-            __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21);
+            __TestExpression__("3 lots of open bracket 5 plus 2 close bracket", 21, debug);
 
-            __TestExpression__("What is 2 plus 3", 5);
+            __TestExpression__("What is 2 plus 3", 5, debug);
 
-            __TestExpression__("What is four plus three", 7);
+            __TestExpression__("What is four plus three", 7, debug);
+
+            __TestExpression__("negative five minus three", -8, debug);
+
+            __TestExpression__("four minus negative two", 6, debug);
+
+            __TestExpression__("eight squared", 64);
+
+            __TestExpression__("four to the three", 64);
+
+            __TestExpression__("log ten", 1);
+
+            __TestExpression__("log one", 0);
+
+            __TestExpression__("log base two of eight", 3);
+
+            // __TestExpression__("ln zero", 1);
 
         }
 
@@ -105,6 +121,30 @@ namespace Control{
 
         }
 
+        public static void DisplayArray(List<string> list) => DisplayArray(list.ToArray());
+
+        public static void DisplayArray(string[] array){
+
+            string output = "[";
+
+            for (int i = 0 ; i < array.Length ; i++){
+
+                output += array[i];
+
+                if (i < array.Length - 1){
+
+                    output += ",";
+
+                }
+
+            }
+
+            output += "]";
+
+            Console.WriteLine(output);
+
+        }
+
         /// <summary>
         /// Determines whether the command is a mathematical operation
         /// </summary>
@@ -119,23 +159,7 @@ namespace Control{
 
             if (debug){
 
-                string output = "[";
-
-                for (int i = 0 ; i < filteredCommand.Count ; i++){
-
-                    output += filteredCommand[i];
-
-                    if (i != filteredCommand.Count - 1){
-
-                        output += ",";
-
-                    }
-
-                }
-
-                output += "]";
-
-                Console.WriteLine(output);
+                DisplayArray(filteredCommand);
 
             }
 
@@ -155,23 +179,7 @@ namespace Control{
 
             if (debug){
 
-                string output = "[";
-
-                for (int i = 0 ; i < filteredCommand.Count ; i++){
-
-                    output += filteredCommand[i];
-
-                    if (i != filteredCommand.Count - 1){
-
-                        output += ",";
-
-                    }
-
-                }
-
-                output += "]";
-
-                Console.WriteLine(output);
+                DisplayArray(filteredCommand);
 
             }
 
@@ -187,6 +195,8 @@ namespace Control{
 
             string symbolToAppend = "";
 
+            bool dualOperator = false;
+
             foreach(string value in commandComponents){
 
                 if (IsNumerical(value)){
@@ -197,13 +207,22 @@ namespace Control{
 
                     }
 
-                    equation += symbolToAppend;
+                    equation += $"{symbolToAppend}";
 
                     symbolToAppend = "";
 
                     if (previousWasNumber){
 
-                        return (false, null);
+                        if (dualOperator){
+
+                            equation += " ";
+
+                        }
+                        else{
+
+                            return (false, null);
+
+                        }
 
                     }
 
@@ -230,6 +249,10 @@ namespace Control{
 
                         if (keyword.isKeyword){
 
+                            string operandIdentifier = keyword.operation.Split('_')[2];
+
+                            dualOperator = operandIdentifier == "1" || operandIdentifier == "2";
+
                             previousWasNumber = false;
 
                             string firstWord = keyword.matchedKeyword.Split(' ')[0];
@@ -240,7 +263,7 @@ namespace Control{
 
                             }
                             
-                            symbolToAppend = $" {keyword.operation}";
+                            symbolToAppend = $"{(equation != "" ? " " : "")}{keyword.operation}";
 
                             keywordFirstWord = firstWord;
 
@@ -256,7 +279,7 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"Equation: {equation}");
+                Console.WriteLine($"Equation: '{equation}'");
 
             }
 
@@ -280,7 +303,15 @@ namespace Control{
 
                     }
 
-                    string symbol = match.group.Attributes["symbol"].Value;
+                    string symbol = "";
+
+                    if (match.group.Attributes["loperand"] != null){
+
+                        symbol += $"{match.group.Attributes["loperand"].Value} ";
+
+                    }
+
+                    symbol += match.group.Attributes["symbol"].Value;
 
                     if (match.keyword.Attributes["append"] != null){
 
@@ -291,6 +322,12 @@ namespace Control{
                     symbol += $"_{match.group.Attributes["priority"].Value}";
 
                     symbol += $"_{match.group.Attributes["operandIdentifier"].Value}";
+
+                    if (match.group.Attributes["roperand"] != null){
+
+                        symbol += $" {match.group.Attributes["roperand"].Value}";
+
+                    }
 
                     return (true, symbol, match.keyword.InnerXml);
 

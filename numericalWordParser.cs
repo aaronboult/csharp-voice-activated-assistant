@@ -72,6 +72,12 @@ namespace MathsAbstractions{
 
             __PerformTest__("five eight six", 586);
 
+            __PerformTest__("negative eight", -8);
+
+            __PerformTest__("negative negative two", 2);
+
+            __PerformTest__("negative two", -2);
+
         }
 
         private static void __PerformTest__(string phrase, double expected, bool debug = false){
@@ -113,6 +119,12 @@ namespace MathsAbstractions{
 
                 if (IsNumericalWord(components[i])){
 
+                    if (numbericalPhraseAccumulator != ""){
+
+                        numbericalPhraseAccumulator += " ";
+
+                    }
+
                     numbericalPhraseAccumulator += components[i];
 
                 }
@@ -120,13 +132,13 @@ namespace MathsAbstractions{
 
                     if (numbericalPhraseAccumulator != ""){
 
-                        parsedResult += $" {Parse(numbericalPhraseAccumulator, debug)}";
+                        parsedResult += $"{(parsedResult != "" ? " " : "")}{Parse(numbericalPhraseAccumulator, debug)}";
 
                         numbericalPhraseAccumulator = "";
 
                     }
 
-                    parsedResult += $" {components[i]}";
+                    parsedResult += $"{(parsedResult != "" ? " " : "")}{components[i]}";
 
                 }
 
@@ -162,6 +174,8 @@ namespace MathsAbstractions{
             bool multiPlaceValue = false; // Whether a number is constructed using multiple places, i.e. two hundred and ten thousand
 
             bool nextIsDecimal = false; // Decimal refers to a value after a decimal point, i.e. .1
+
+            bool isNegative = false;
 
             (int count, bool on) decimalToggle = (0, false);
 
@@ -256,6 +270,9 @@ namespace MathsAbstractions{
                         switch (match.value){
                             case 0:
                                 decimalToggle = (1, true);
+                                break;
+                            case 1:
+                                isNegative = !isNegative;
                                 break;
                         }
                         break;
@@ -374,7 +391,7 @@ namespace MathsAbstractions{
                 
             }
 
-            return accumulator;
+            return isNegative ? -accumulator : accumulator;
 
         }
 
@@ -382,13 +399,19 @@ namespace MathsAbstractions{
 
             (bool success, XmlNode group, XmlNode word) match = XmlManager.HasSecondLevelChild(word, ref map, "name");
 
-            WordGroups matchedGroup = (WordGroups)int.Parse(match.group.Attributes["name"].Value);
+            WordGroups matchedGroup = WordGroups.UNMATCHED;
 
             double matchedValue = 0;
 
-            if (matchedGroup != WordGroups.CONNECTOR && matchedGroup != WordGroups.UNMATCHED){
+            if (match.success){
 
-                matchedValue = double.Parse(match.word.Attributes["value"].Value);
+                matchedGroup = (WordGroups)int.Parse(match.group.Attributes["name"].Value);
+
+                if (matchedGroup != WordGroups.CONNECTOR){
+
+                    matchedValue = double.Parse(match.word.Attributes["value"].Value);
+
+                }
 
             }
 

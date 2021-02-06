@@ -75,7 +75,29 @@ namespace MathsAbstractions{
 
             Operation.debug = debug;
 
+            if (debug){
+
+                Console.WriteLine($"Generating tree with equation: '{equation}'");
+
+            }
+
             string[] components = equation.Split(' ');
+
+            if (components.Length == 1){
+
+                expression = new List<Operation>();
+
+                expression.Add(
+                    new Operation("+_0_0")
+                );
+
+                expression[0].operandOne = new Operation.Operand(components[0]);
+
+                expression[0].operandTwo = new Operation.Operand("0");
+
+                return;
+
+            }
 
             int[] operationIndexs = ProfileOperators(ref components);
 
@@ -103,7 +125,7 @@ namespace MathsAbstractions{
 
             bool settingLeft = true;
 
-            int rightConsumerIndex = -1; // -1 denotes there is no set rightConsumer
+            int operandTwoConsumerIndex = -1; // -1 denotes there is no set operandTwoConsumer
 
             for (int i = 0 ; i < expression.Count ; i++){
 
@@ -122,15 +144,15 @@ namespace MathsAbstractions{
 
                 if (expression[i].operandData == Operation.OperatorInfo.BRACKETOPEN){
 
-                    bracketQueue.Push((i, rightConsumerIndex));
+                    bracketQueue.Push((i, operandTwoConsumerIndex));
 
-                    rightConsumerIndex = -1;
+                    operandTwoConsumerIndex = -1;
 
                     settingLeft = true;
 
                     if (expression.Count - 1 > i){
 
-                        expression[bracketQueue.Peek().Item1].right = new Operation.Operand(expression[i + 1]);
+                        expression[bracketQueue.Peek().Item1].operandTwo = new Operation.Operand(expression[i + 1]);
 
                     }
 
@@ -139,7 +161,7 @@ namespace MathsAbstractions{
                 }
                 else if (expression[i].operandData == Operation.OperatorInfo.BRACKETCLOSE){
 
-                    rightConsumerIndex = bracketQueue.Pop().Item2;
+                    operandTwoConsumerIndex = bracketQueue.Pop().Item2;
 
                     operatorsToRemove.Add(i);
 
@@ -147,11 +169,11 @@ namespace MathsAbstractions{
 
                     if (expression.Count - 1 > i){
 
-                        expression[i + 1].left = new Operation.Operand(expression[rightConsumerIndex]);
+                        expression[i + 1].operandOne = new Operation.Operand(expression[operandTwoConsumerIndex]);
                         
                         if (bracketQueue.Count > 0){
 
-                            expression[bracketQueue.Peek().Item1].right = new Operation.Operand(expression[i + 1]);
+                            expression[bracketQueue.Peek().Item1].operandTwo = new Operation.Operand(expression[i + 1]);
 
                         }
 
@@ -163,7 +185,7 @@ namespace MathsAbstractions{
 
                 if (settingLeft){
 
-                    expression[i].left = new Operation.Operand(operands.Pop());
+                    expression[i].operandOne = new Operation.Operand(operands.Pop());
 
                 }
 
@@ -171,24 +193,24 @@ namespace MathsAbstractions{
 
                 if (expression.Count - 1 > i){
 
-                    if (expression[i].priority >= expression[i + 1].priority){ // Consume as many operands as needed; assign self to next's left
+                    if (expression[i].priority >= expression[i + 1].priority){ // Consume as many operands as needed; assign self to next's operandOne
 
-                        if (rightConsumerIndex < 0 || expression[i].priority == expression[i + 1].priority){
+                        if (operandTwoConsumerIndex < 0 || expression[i].priority == expression[i + 1].priority){
 
-                            expression[i + 1].left = new Operation.Operand(expression[i]);
+                            expression[i + 1].operandOne = new Operation.Operand(expression[i]);
 
-                            if (rightConsumerIndex >= 0){ // If there is a rightConsumer set, update where it's right reference points to
+                            if (operandTwoConsumerIndex >= 0){ // If there is a operandTwoConsumer set, update where it's operandTwo reference points to
 
-                                expression[rightConsumerIndex].right = new Operation.Operand(expression[i + 1]);
+                                expression[operandTwoConsumerIndex].operandTwo = new Operation.Operand(expression[i + 1]);
 
                             }
 
                         }
                         else{
 
-                            expression[i + 1].left = new Operation.Operand(expression[rightConsumerIndex]);
+                            expression[i + 1].operandOne = new Operation.Operand(expression[operandTwoConsumerIndex]);
 
-                            rightConsumerIndex = -1;
+                            operandTwoConsumerIndex = -1;
 
                         }
 
@@ -199,9 +221,9 @@ namespace MathsAbstractions{
                         
                         if (expression[i + 1].operandData != Operation.OperatorInfo.BRACKETCLOSE){
 
-                            expression[i].right = new Operation.Operand(expression[i + 1]);
+                            expression[i].operandTwo = new Operation.Operand(expression[i + 1]);
 
-                            rightConsumerIndex = i;
+                            operandTwoConsumerIndex = i;
 
                             continue;
 
@@ -210,20 +232,20 @@ namespace MathsAbstractions{
                     }
 
                 }
-                else if (rightConsumerIndex >= 0){
+                else if (operandTwoConsumerIndex >= 0){
 
-                    if (expression[rightConsumerIndex].priority >= expression[i].priority){
+                    if (expression[operandTwoConsumerIndex].priority >= expression[i].priority){
 
-                        expression[i].left = new Operation.Operand(expression[rightConsumerIndex]);
+                        expression[i].operandOne = new Operation.Operand(expression[operandTwoConsumerIndex]);
 
                     }
                     else{
 
-                        expression[i].right = new Operation.Operand(operands.Pop());
+                        expression[i].operandTwo = new Operation.Operand(operands.Pop());
 
                     }
 
-                    rightConsumerIndex = -1;
+                    operandTwoConsumerIndex = -1;
 
                     if (operands.Count == 0){
                         
@@ -239,7 +261,7 @@ namespace MathsAbstractions{
 
                 }
 
-                expression[i].right = new Operation.Operand(operands.Pop());
+                expression[i].operandTwo = new Operation.Operand(operands.Pop());
 
             }
             
@@ -275,7 +297,7 @@ namespace MathsAbstractions{
         private int[] ProfileOperators(ref string[] components){
 
             expression = new List<Operation>();
-
+            
             List<int> operationIndexBuffer = new List<int>();
 
             for (int i = 0 ; i < components.Length ; i++){
@@ -307,7 +329,7 @@ namespace MathsAbstractions{
                 Console.WriteLine("\n\n\nCalculating:\n");
 
             }
-
+            
             double value = expression[entryIndex].Calculate();
 
             if (debug){
@@ -328,22 +350,22 @@ namespace MathsAbstractions{
 
         public readonly byte priority;
 
-        public Operand left;
-        public Operand right;
+        public Operand operandOne;
+        public Operand operandTwo;
 
         public readonly OperatorInfo operandData;
 
         private bool hasLeft
         {
             get{
-                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.LEFT;
+                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.LEFTLEFT;
             }
         }
 
         private bool hasRight
         {
             get{
-                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.RIGHT || operandData == OperatorInfo.BRACKETOPEN;
+                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.RIGHTRIGHT || operandData == OperatorInfo.BRACKETOPEN;
             }
         }
 
@@ -353,9 +375,9 @@ namespace MathsAbstractions{
 
         /*
             operandIdentifier:
-                0 - left and right
-                1 - left
-                2 - right
+                0 - operandOne and operandTwo
+                1 - operandOne lwdr
+                2 - operandTwo operandTwo
                 3 - symbol
                 4 - wrapper
             priority:
@@ -377,11 +399,11 @@ namespace MathsAbstractions{
                     break;
                 
                 case "1":
-                    operandData = OperatorInfo.LEFT;
+                    operandData = OperatorInfo.LEFTLEFT;
                     break;
                 
                 case "2":
-                    operandData = OperatorInfo.RIGHT;
+                    operandData = OperatorInfo.RIGHTRIGHT;
                     break;
 
                 case "3":
@@ -435,7 +457,15 @@ namespace MathsAbstractions{
                 case "^":
                     opcode = 0x06;
                     break;
-
+                
+                case "rt":
+                    opcode = 0x07;
+                    break;
+                
+                case "log":
+                    opcode = 0x08;
+                    break;
+                
                 default:
                     throw new ArgumentException("The given operation is not implemented");
 
@@ -447,15 +477,15 @@ namespace MathsAbstractions{
 
             int references = 1; // Start with 1 to account for itself
 
-            if (hasLeft && !left.isConstant){
+            if (hasLeft && !operandOne.isConstant){
 
-                references += left.childReferenceCount;
+                references += operandOne.childReferenceCount;
 
             }
 
-            if (hasRight && !right.isConstant){
+            if (hasRight && !operandTwo.isConstant){
 
-                references += right.childReferenceCount;
+                references += operandTwo.childReferenceCount;
 
             }
 
@@ -465,40 +495,46 @@ namespace MathsAbstractions{
 
         public double Calculate(){
 
-            double leftValue = left.value;
+            double valueOne = operandOne.value;
 
-            double rightValue = right.value;
+            double valueTwo = operandTwo.value;
 
             if (debug){
                 
                 Console.WriteLine(this.ToString());
 
-                Console.WriteLine($"Using Opcode: {opcode}\nLeft: {leftValue}\nRight: {rightValue}\n---------------------------------------------------------------------");
+                Console.WriteLine($"Using Opcode: {opcode}\nLeft: {valueOne}\nRight: {valueTwo}\n---------------------------------------------------------------------");
 
             }
 
             switch (opcode){
 
                 case 0x00: // Add
-                    return leftValue + rightValue;
+                    return valueOne + valueTwo;
 
                 case 0x01: // Subtract
-                    return leftValue - rightValue;
+                    return valueOne - valueTwo;
 
                 case 0x02: // Subtract Inverted
-                    return rightValue - leftValue;
+                    return valueTwo - valueOne;
 
                 case 0x03: // Multiply
-                    return leftValue * rightValue;
+                    return valueOne * valueTwo;
 
                 case 0x04: // Divide
-                    return leftValue / rightValue;
+                    return valueOne / valueTwo;
                 
                 case 0x05: // Open bracket
-                    return rightValue;
+                    return valueTwo;
                 
                 case 0x06:
-                    return Math.Pow(leftValue, rightValue);
+                    return Math.Pow(valueOne, valueTwo);
+                
+                case 0x07:
+                    return Math.Pow(valueTwo, 1 / valueOne);
+                
+                case 0x08:
+                    return Math.Log(valueTwo, valueOne);
 
                 default:
                     throw new ArgumentException("The given opcode has not yet been implemented.");
@@ -509,14 +545,14 @@ namespace MathsAbstractions{
 
         public override string ToString(){
 
-            return $"Priority: {priority}\nHas Left: {hasLeft}\nHas Right: {hasRight}\nOpcode: {opcode}\nLeft Is Constant: {left.isConstant}\nRight Is Constant: {right.isConstant}";
+            return $"Priority: {priority}\nHas Left: {hasLeft}\nHas Right: {hasRight}\nOpcode: {opcode}\nLeft Is Constant: {operandOne.isConstant}\nRight Is Constant: {operandTwo.isConstant}";
 
         }
 
         public enum OperatorInfo{
             LEFTRIGHT,
-            LEFT,
-            RIGHT,
+            LEFTLEFT,
+            RIGHTRIGHT,
             FUNCTION,
             BRACKETOPEN,
             BRACKETCLOSE,

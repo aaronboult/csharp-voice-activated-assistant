@@ -2,42 +2,75 @@
     <numbers name="2">
         <item name="a" value="1" />
         <item name="zero" value="0" />
+        <item name="zeroth" value="0" />
         <item name="one" value="1" />
+        <item name="first" value="1" />
         <item name="two" value="2" />
+        <item name="second" value="2" />
         <item name="three" value="3" />
+        <item name="third" value="3" />
         <item name="four" value="4" />
+        <item name="fourth" value="4" />
         <item name="five" value="5" />
+        <item name="fifth" value="5" />
         <item name="six" value="6" />
+        <item name="sixth" value="6" />
         <item name="seven" value="7" />
+        <item name="seventh" value="7" />
         <item name="eight" value="8" />
+        <item name="eighth" value="8" />
         <item name="nine" value="9" />
+        <item name="nineth" value="9" />
         <item name="ten" value="10" />
+        <item name="tenth" value="10" />
         <item name="eleven" value="11" />
+        <item name="eleventh" value="11" />
         <item name="twelve" value="12" />
+        <item name="twelfth" value="12" />
         <item name="thirteen" value="13" />
+        <item name="thirteenth" value="13" />
         <item name="fourteen" value="14" />
+        <item name="fourteenth" value="14" />
         <item name="fifteen" value="15" />
+        <item name="fifteenth" value="15" />
         <item name="sixteen" value="16" />
+        <item name="sixteenth" value="16" />
         <item name="seventeen" value="17" />
+        <item name="seventeenth" value="17" />
         <item name="eighteen" value="18" />
+        <item name="eighteenth" value="18" />
         <item name="nineteen" value="19" />
+        <item name="nineteenth" value="19" />
     </numbers>
     <tens name="1">
         <item name="twenty" value="20" />
+        <item name="twentieth" value="20" />
         <item name="thirty" value="30" />
+        <item name="thirtieth" value="30" />
         <item name="forty" value="40" />
+        <item name="fortieth" value="40" />
         <item name="fifty" value="50" />
+        <item name="fiftieth" value="50" />
         <item name="sixty" value="60" />
+        <item name="sixtieth" value="60" />
         <item name="seventy" value="70" />
+        <item name="seventieth" value="70" />
         <item name="eighty" value="80" />
+        <item name="eightieth" value="80" />
         <item name="ninety" value="90" />
+        <item name="ninetieth" value="90" />
     </tens>
     <places name="0">
         <item name="hundred" value="100" />
+        <item name="hundredth" value="100" />
         <item name="thousand" value="1000" />
+        <item name="thousandth" value="1000" />
         <item name="million" value="1000000" />
+        <item name="millionth" value="1000000" />
         <item name="billion" value="1000000000" />
+        <item name="billionth" value="1000000000" />
         <item name="trillion" value="100000000000" />
+        <item name="trillionth" value="100000000000" />
     </places>
     <connectors name="3">
         <item name="and" />
@@ -45,5 +78,6 @@
     <commands name="4">
         <item name="point" value="0" />
         <item name="dot" value="0" />
+        <item name="negative" value="1" />
     </commands>
 </xml>

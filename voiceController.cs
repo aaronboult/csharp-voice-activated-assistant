@@ -7,9 +7,15 @@ namespace Control{
 
         bool debug;
 
-        public void Listen(bool debug = false){
+        bool terminate;
+
+        public VoiceController(bool debug = false){
 
             this.debug = debug;
+
+        }
+
+        public void Listen(){
 
             if (debug){
 
@@ -17,7 +23,7 @@ namespace Control{
 
             }
 
-            // try{
+            try{
 
                 using (
                     SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(
@@ -38,20 +44,22 @@ namespace Control{
 
                     }
 
-                    while (true){
+                    while (!terminate){
 
-                        Console.ReadLine();
+                        string input = Console.ReadLine();
+
+                        TryExecuteCommand(input);
 
                     }
 
                 }
 
-            // }
-            // catch{
+            }
+            catch{
 
-            //     Console.WriteLine("An error relating to the Speech assembly has occurred and the process will now terminate.");
+                Console.WriteLine("An error relating to the Speech assembly has occurred and the process will now terminate.");
 
-            // }
+            }
 
         }
 
@@ -59,13 +67,38 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"Recognized: {e.Result.Text}");
+                Console.WriteLine($"Recognized: {e.Result.Text}\nComfidence: {e.Result.Confidence}");
 
             }
 
-            Command command = new Command(e.Result.Text, debug);
+            TryExecuteCommand(e.Result.Text, true);
 
-            command.Execute();
+        }
+
+        private void TryExecuteCommand(string commandText, bool voice = false){
+
+            if (commandText.Split(' ')[0].ToLower() != "cake" && voice){
+
+                return;
+
+            }
+
+            Console.WriteLine($"Executing {commandText}");
+
+            try{
+
+                Command command = new Command(commandText, debug);
+
+                string result = command.Execute();
+
+                Console.WriteLine(result);
+
+            }
+            catch{
+
+                terminate = true;
+
+            }
 
         }
 

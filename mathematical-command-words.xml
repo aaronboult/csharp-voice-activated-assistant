@@ -2,8 +2,8 @@
 <!--
     operandIdentifier:
         0 - left and right
-        1 - left
-        2 - right
+        1 - left left
+        2 - right right
         3 - symbol
         4 - wrapper
     priority:
@@ -40,4 +40,41 @@
         <word>over</word>
         <word>by</word>
     </division>
+    <squared symbol="^" priority="2" operandIdentifier="0" roperand="2">
+        <word>square</word>
+        <word>squared</word>
+        <word>SQ</word>
+    </squared>
+
+    <!-- To add opcodes for -->
+
+    <squareroot symbol="rt" priority="2" operandIdentifier="0" loperand="2">
+        <word>square root</word>
+        <word>sqrt</word>
+    </squareroot>
+    <cuberoot symbol="rt" priority="2" operandIdentifier="0" loperand="3">
+        <word>cube root</word>
+        <word>cbrt</word>
+    </cuberoot>
+    <root symbol="rt" priority="2" operandIdentifier="0">
+        <word>root</word>
+        <word>root of</word>
+        <word>rt</word>
+    </root>
+    <power symbol="^" priority="2" operandIdentifier="0">
+        <word>to the power of</word>
+        <word>raised to</word>
+        <word>to the</word>
+    </power>
+    <log symbol="log" priority="2" operandIdentifier="1" roperand="10">
+        <word>log</word>
+    </log>
+    <log symbol="log" priority="2" operandIdentifier="1">
+        <word>log base</word>
+        <word>log of</word>
+    </log>
+    <ln symbol="ln" priority="2" operandIdentifier="1">
+        <word>ln</word>
+        <word>natural log</word>
+    </ln>
 </xml>
