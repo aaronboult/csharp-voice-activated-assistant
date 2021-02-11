@@ -6,18 +6,23 @@ namespace Managers{
 
     public static class XmlManager{
 
+        /// <summary>
+        /// Creates a new XmlDocument object, loading the given file
+        /// </summary>
+        /// <param name="name">The name of the file to load</param>
+        /// <returns>An XmlDocument object containing the files data</returns>
         public static XmlDocument LoadDocument(string name){
 
             XmlDocument loadedDocument = new XmlDocument();
 
             try{
 
-                loadedDocument.Load(name);
+                loadedDocument.Load($"xmldocs/{name}");
                 
             }
             catch (FileNotFoundException){
 
-                throw new Exception($"The {name} document is either missing or corrupt.");
+                throw new FileNotFoundException($"The {name} document is either missing or corrupt.");
 
             }
 
@@ -25,32 +30,24 @@ namespace Managers{
 
         }
 
-        /// <summary>
-        /// Determines whether an XmlDocument contains a given element two levels lower than the roow
-        /// </summary>
-        /// <param name="tagName">The word to check for</param>
-        /// <param name="document">The document to lookup</param>
-        /// <returns>A tuple containing success, the first level node and the matched node</returns>
-        public static (bool, XmlNode, XmlNode) HasSecondLevelChild(string tagName, ref XmlDocument document, string attributeToRead = ""){
-            
-            foreach (XmlNode group in document.FirstChild.ChildNodes){
+        public static (bool, XmlNode) GetMatchInNodeList(string textToMatch, XmlNodeList group, string attributeToRead = ""){
 
-                foreach (XmlNode keyword in group.ChildNodes){
+            (bool, XmlNode) result = (false, null);
 
-                    if (tagName == keyword.InnerXml){
+            foreach (XmlNode node in group){
 
-                        return (true, group, keyword);
+                if (textToMatch == node.InnerXml && attributeToRead == ""){
 
-                    }
-                    else if (attributeToRead != ""){
+                    result = (true, node);
 
-                        if (keyword.Attributes[attributeToRead] != null){
+                }
+                else if (attributeToRead != ""){
 
-                            if (keyword.Attributes[attributeToRead].Value == tagName){
+                    if (node.Attributes[attributeToRead] != null){
 
-                                return (true, group, keyword);
+                        if (node.Attributes[attributeToRead].Value == textToMatch){
 
-                            }
+                            result = (true, node);
 
                         }
 
@@ -60,7 +57,37 @@ namespace Managers{
 
             }
 
-            return (false, null, null);
+            return result;
+
+
+
+        }
+
+        public static (bool, XmlNode) GetFirstLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = "") => GetMatchInNodeList(textToMatch, document.FirstChild.ChildNodes, attributeToRead);
+
+        /// <summary>
+        /// Determines whether an XmlDocument contains a given element two levels lower than the roow
+        /// </summary>
+        /// <param name="textToMatch">The word to check for</param>
+        /// <param name="document">The document to lookup</param>
+        /// <returns>A tuple containing success, the first level node and the matched node</returns>
+        public static (bool, XmlNode, XmlNode) GetSecondLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = ""){
+
+            (bool, XmlNode, XmlNode) result = (false, null, null);
+            
+            foreach (XmlNode group in document.FirstChild.ChildNodes){
+
+                (bool success, XmlNode node) match = GetMatchInNodeList(textToMatch, group.ChildNodes, attributeToRead);
+
+                if (match.success){
+
+                    return (true, group, match.node);
+
+                }
+
+            }
+
+            return result;
 
         }
 

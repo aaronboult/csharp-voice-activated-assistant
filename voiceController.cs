@@ -1,13 +1,18 @@
 using System;
 using System.Speech.Recognition;
+using System.Speech.Synthesis;
 
 namespace Control{
 
-    public class VoiceController{
+    class VoiceController{
 
-        bool debug;
+        private bool debug;
 
-        bool terminate;
+        private bool terminate;
+
+        private SpeechSynthesizer synthesiser;
+
+        public bool speakOutput = false;
 
         public VoiceController(bool debug = false){
 
@@ -23,41 +28,35 @@ namespace Control{
 
             }
 
-            try{
+            using (synthesiser = new SpeechSynthesizer())
+            using (
+                SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(
+                    new System.Globalization.CultureInfo("en-GB")
+                )
+            ){
+                synthesiser.SetOutputToDefaultAudioDevice();
 
-                using (
-                    SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(
-                        new System.Globalization.CultureInfo("en-GB")
-                    )
-                ){
-                    recognizer.LoadGrammar(new DictationGrammar());
+                recognizer.LoadGrammar(new DictationGrammar());
 
-                    recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
+                recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
 
-                    recognizer.SetInputToDefaultAudioDevice();
+                recognizer.SetInputToDefaultAudioDevice();
 
-                    recognizer.RecognizeAsync(RecognizeMode.Multiple);
+                recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
-                    if (debug){
+                if (debug){
 
-                        Console.WriteLine("Listener up");
-
-                    }
-
-                    while (!terminate){
-
-                        string input = Console.ReadLine();
-
-                        TryExecuteCommand(input);
-
-                    }
+                    Console.WriteLine("Listener up");
 
                 }
 
-            }
-            catch{
+                while (!terminate){
 
-                Console.WriteLine("An error relating to the Speech assembly has occurred and the process will now terminate.");
+                    string input = Console.ReadLine();
+
+                    TryExecuteCommand(input);
+
+                }
 
             }
 
@@ -92,6 +91,12 @@ namespace Control{
                 string result = command.Execute();
 
                 Console.WriteLine(result);
+
+                if (speakOutput){
+
+                    synthesiser.Speak(result);
+
+                }
 
             }
             catch{

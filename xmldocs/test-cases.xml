@@ -1,0 +1,79 @@
+<xml version="1.0" encoding="utf-8" standalone="yes">
+    <test-group name="math-tree">
+        <test input="5 +_0_0 5" output="10" debug="false" text="5 + 5" />
+        <test input="3 *_1_0 3 -_0_0 2 *_1_0 4" output="1" debug="false" text="3 * 3 - 2 * 4" />
+        <test input="9 -_0_0 8 *_1_0 7 +_0_0 6 /_1_0 2" output="-44" debug="false" text="9 - 8 * 7 + 6 / 2" />
+        <test input="2 *_1_0 3 *_1_0 4 *_1_0 5 *_1_0 6 *_1_0 7" output="5040" debug="false" text="2 * 3 * 4 * 5 * 6 * 7" />
+        <test input="10 -_0_0 1 *_1_0 2 *_1_0 3 +_0_0 20" output="24" debug="false" text="10 - 1 * 2 * 3 + 20" />
+        <test input="-6 +_0_0 3" output="-3" debug="false" text="-6 + 3" />
+        <test input="3 -inv_3_0 6" output="3" debug="false" text="6 - 3" />
+        <test input="2 *_1_0 (_3_4 3 +_0_0 5 )_3_5" output="16" debug="false" text="2 * ( 3 + 5 )" />
+        <test input="2 *_1_0 (_3_4 1 +_0_0 2 )_3_5 +_0_0 1" output="7" debug="false" text="2 * ( 1 + 2 ) + 1" />
+        <test input="2 *_1_0 (_3_4 1 +_0_0 2 *_1_0 4 )_3_5 +_0_0 7" output="25" debug="false" text="2 * ( 1 + 2 * 4 )" />
+        <test input="3 *_1_0 (_3_4 2 *_1_0 (_3_4 3 +_0_0 5 )_3_5 )_3_5" output="48" debug="false" text="3 * ( 2 * ( 3 + 5 ) )" />
+        <test input="2 *_1_0 (_3_4 6 /_1_0 (_3_4 1 +_0_0 (_3_4 4 /_1_0 2 )_3_5 )_3_5 )_3_5" output="4" debug="false" text="2 * ( 6 / ( 1 + ( 4 / 2 ) ) )" />
+        <test input="3 *_1_0 (_3_4 4 /_1_0 2 )_3_5 -_0_0 1" output="5" debug="false" text="3 * ( 4 / 2 ) - 1" />
+        <test input="2 *_1_0 (_3_4 3 *_1_0 (_3_4 1 +_0_0 1 )_3_5 -_0_0 2 )_3_5" output="8" debug="false" text="2 * ( 3 * ( 1 + 1 ) - 2 )" />
+        <test input="1 +_0_0 3 ^_2_0 2" output="10" debug="false" text="1 + 3 ^ 2" />
+    </test-group>
+    <test-group name="command-parser">
+        <test input="5 add 6" output="11" debug="false" />
+        <test input="6 over 2" output="3" debug="false" />
+        <test input="8 lots of 3" output="24" debug="false" />
+        <test input="400 times 200" output="80000" debug="false" />
+        <test input="8 more than 4 over 2 take 5" output="5" debug="false" />
+        <test input="3 lots of open bracket 5 plus 2 close bracket" output="21" debug="false" />
+        <test input="What is 2 plus 3" output="5" debug="false" />
+        <test input="What is four plus three" output="7" debug="false" />
+        <test input="negative five minus three" output="-8" debug="false" />
+        <test input="four minus negative two" output="6" debug="false" />
+        <test input="eight squared" output="64" debug="false" />
+        <test input="four to the three" output="64" debug="false" />
+        <test input="log ten" output="1" debug="false" />
+        <test input="log one" output="0" debug="false" />
+        <test input="log base two of eight" output="3" debug="false" />
+        <test input="one plus log base two of eight" output="4" debug="false" />
+        <test input="two times log base two of eight" output="6" debug="false" />
+        <test input="log base three of nine times two" output="4" debug="false" />
+        <test input="log base two of open bracket one plus seven close bracket" output="3" debug="false" />
+        <test input="log open bracket five plus five close bracket" output="1" debug="false" />
+        <test input="log base open bracket one plus one close bracket of eight" output="3" debug="false" />
+        <test input="log base open bracket one plus one close bracket of open bracket six plus two close bracket" output="3" debug="false" />
+        <test input="ln one" output="0" debug="false" />
+        <test input="What is a hawk" output="hawk" debug="false" />
+        <test input="What's green mile summary" output="green mile summary" debug="false" />
+    </test-group>
+    <test-group name="numerical-word-parser">
+        <test input="one" output="1" debug="false" />
+        <test input="twenty three" output="23" debug="false" />
+        <test input="five hundred and seven" output="507" debug="false" />
+        <test input="two hundred thousand" output="200000" debug="false" />
+        <test input="six hundred and ninety four thousand" output="694000" debug="false" />
+        <test input="twenty two thousand" output="22000" debug="false" />
+        <test input="five thousand and one" output="5001" debug="false" />
+        <test input="a hundred and two" output="102" debug="false" />
+        <test input="six hundred and one thousand" output="601000" debug="false" />
+        <test input="two million five thousand and six" output="2005006" debug="false" />
+        <test input="five point four" output="5.4" debug="false" />
+        <test input="four point fifty three" output="4.53" debug="false" />
+        <test input="one point twelve" output="1.12" debug="false" />
+        <test input="ten point seventy five" output="10.75" debug="false" />
+        <test input="one hundred and seven point three six five" output="107.365" debug="false" />
+        <test input="two point four thousand point one" output="2400.1" debug="false" />
+        <test input="two point five million and twelve" output="2500012" debug="false" />
+        <test input="twelve hundred" output="1200" debug="false" />
+        <test input="point five" output="0.5" debug="false" />
+        <test input="two hundred point one thousand" output="200100" debug="false" />
+        <test input="three point one four one five nine two six five four" output="3.141592654" debug="false" />
+        <test input="point nine million" output="900000" debug="false" />
+        <test input="point five hundred and six" output="56" debug="false" />
+        <test input="point zero zero zero seven" output="0.0007" debug="false" />
+        <test input="one hundred and ninety thousand" output="190000" debug="false" />
+        <test input="five hundred thirty" output="530" debug="false" />
+        <test input="two million eighty four thousand" output="2084000" debug="false" />
+        <test input="five eight six" output="586" debug="false" />
+        <test input="negative eight" output="-8" debug="false" />
+        <test input="negative negative two" output="2" debug="false" />
+        <test input="negative two" output="-2" debug="false" />
+    </test-group>
+</xml>

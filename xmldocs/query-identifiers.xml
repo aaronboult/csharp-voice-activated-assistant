@@ -1,0 +1,12 @@
+<xml version="1.0" encoding="utf-8" standalone="yes">
+    <word-group name="question-words">
+        <word>what</word>
+        <word>whats</word>
+        <word>what's</word>
+        <word>is</word>
+        <word>what is</word>
+        <word>what is a</word>
+    </word-group>
+    <word-group name="maths-question-words">
+    </word-group>
+</xml>

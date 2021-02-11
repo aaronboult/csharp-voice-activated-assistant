@@ -14,77 +14,11 @@ namespace MathsAbstractions{
 
         }
 
-        public static void __TestWordParser__(){
-
-            __PerformTest__("one", 1);
-
-            __PerformTest__("twenty three", 23);
-
-            __PerformTest__("five hundred and seven", 507);
-
-            __PerformTest__("two hundred thousand", 200_000);
-
-            __PerformTest__("six hundred and ninety four thousand", 694_000);
-
-            __PerformTest__("twenty two thousand", 22_000);
-
-            __PerformTest__("five thousand and one", 5001);
-
-            __PerformTest__("a hundred and two", 102);
-
-            __PerformTest__("six hundred and one thousand", 601_000);
-
-            __PerformTest__("two million five thousand and six", 2_005_006);
-
-            __PerformTest__("five point four", 5.4);
-
-            __PerformTest__("four point fifty three", 4.53);
-
-            __PerformTest__("one point twelve", 1.12);
-
-            __PerformTest__("ten point seventy five", 10.75);
-
-            __PerformTest__("one hundred and seven point three six five", 107.365);
-
-            __PerformTest__("two point four thousand point one", 2400.1);
-
-            __PerformTest__("two point five million and twelve", 2_500_012);
-
-            __PerformTest__("twelve hundred", 1200);
-
-            __PerformTest__("point five", 0.5);
-
-            __PerformTest__("two hundred point one thousand", 200_100);
-
-            __PerformTest__("three point one four one five nine two six five four", 3.141592654);
-
-            __PerformTest__("point nine million", 900_000);
-
-            __PerformTest__("point five hundred and six", 56);
-
-            __PerformTest__("point zero zero zero seven", 0.0007);
-
-            __PerformTest__("one hundred and ninety thousand", 190_000);
-
-            __PerformTest__("five hundred thirty", 530);
-
-            __PerformTest__("two million eighty four thousand", 2_084_000);
-
-            __PerformTest__("five eight six", 586);
-
-            __PerformTest__("negative eight", -8);
-
-            __PerformTest__("negative negative two", 2);
-
-            __PerformTest__("negative two", -2);
-
-        }
-
-        private static void __PerformTest__(string phrase, double expected, bool debug = false){
+        public static bool __PerformTest__(string phrase, string expected, bool debug = false){
 
             double result = Parse(phrase, debug);
 
-            double difference = Math.Abs(result - expected);
+            double difference = Math.Abs(result - double.Parse(expected));
 
             if (debug){
 
@@ -98,10 +32,14 @@ namespace MathsAbstractions{
 
                 Console.WriteLine("Phrase: {phrase}, Passed: True (floating point inaccuracy)");
 
+                return true;
+
             }
             else{
 
-                Console.WriteLine($"Phrase: {phrase}, Passed: {result == expected}");
+                Console.WriteLine($"Phrase: {phrase}, Passed: {result.ToString() == expected}");
+
+                return result.ToString() == expected;
 
             }
 
@@ -156,7 +94,7 @@ namespace MathsAbstractions{
 
         private static bool IsNumericalWord(string word){
 
-            return XmlManager.HasSecondLevelChild(word, ref map, "name").Item1;
+            return XmlManager.GetSecondLevelChild(word, ref map, "name").Item1;
 
         }
 
@@ -397,7 +335,7 @@ namespace MathsAbstractions{
 
         private static (double, WordGroups) GetMappedWordValue(string word){
 
-            (bool success, XmlNode group, XmlNode word) match = XmlManager.HasSecondLevelChild(word, ref map, "name");
+            (bool success, XmlNode group, XmlNode word) match = XmlManager.GetSecondLevelChild(word, ref map, "name");
 
             WordGroups matchedGroup = WordGroups.UNMATCHED;
 

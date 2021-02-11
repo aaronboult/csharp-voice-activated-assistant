@@ -15,52 +15,19 @@ namespace MathsAbstractions{
         private int entryIndex = 0;
 
         /// <summary>
-        /// Perform tests to check whether the parser is working properly
-        /// </summary>
-        public static void __TestTreeConstructor__(){
-
-            __PerformTest__("5 +_0_0 5", 10); // 5 + 5
-
-            __PerformTest__("3 *_1_0 3 -_0_0 2 *_1_0 4", 1); // 3 * 3 - 2 * 4
-
-            __PerformTest__("9 -_0_0 8 *_1_0 7 +_0_0 6 /_1_0 2", -44); // 9 - 8 * 7 + 6 / 2
-
-            __PerformTest__("2 *_1_0 3 *_1_0 4 *_1_0 5 *_1_0 6 *_1_0 7", 5040); // 2 * 3 * 4 * 5 * 6 * 7
-
-            __PerformTest__("10 -_0_0 1 *_1_0 2 *_1_0 3 +_0_0 20", 24);
-
-            __PerformTest__("-6 +_0_0 3", -3); // -6 + 3
-
-            __PerformTest__("3 -inv_3_0 6", 3); // 6 - 3
-
-            __PerformTest__("2 *_1_0 (_3_4 3 +_0_0 5 )_3_5", 16); // 2 * ( 3 + 5 )
-
-            __PerformTest__("2 *_1_0 (_3_4 1 +_0_0 2 )_3_5 +_0_0 1", 7); // 2 * ( 1 + 2 ) + 1
-
-            __PerformTest__("2 *_1_0 (_3_4 1 +_0_0 2 *_1_0 4 )_3_5 +_0_0 7", 18 + 7); // 2 * ( 1 + 2 * 4 )
-
-            __PerformTest__("3 *_1_0 (_3_4 2 *_1_0 (_3_4 3 +_0_0 5 )_3_5 )_3_5", 48); // 3 * ( 2 * ( 3 + 5 ) )
-
-            __PerformTest__("2 *_1_0 (_3_4 6 /_1_0 (_3_4 1 +_0_0 (_3_4 4 /_1_0 2 )_3_5 )_3_5 )_3_5", 4); // 2 * ( 6 / ( 1 + ( 4 / 2 ) ) )
-
-            __PerformTest__("3 *_1_0 (_3_4 4 /_1_0 2 )_3_5 -_0_0 1", 5); // 3 * ( 4 / 2 ) - 1
-
-            __PerformTest__("2 *_1_0 (_3_4 3 *_1_0 (_3_4 1 +_0_0 1 )_3_5 -_0_0 2 )_3_5", 8); // 2 * ( 3 * ( 1 + 1 ) - 2 )
-
-            __PerformTest__("1 +_0_0 3 ^_2_0 2", 10);
-
-        }
-
-        /// <summary>
         /// Perform a test on the parser
         /// </summary>
         /// <param name="expression">The expression to parse</param>
         /// <param name="expected">The expected result</param>
-        static void __PerformTest__(string expression, double expected, bool debug = false){
+        public static bool __PerformTest__(string expression, string expected, bool debug = false){
 
-            Tree testTree = new Tree(expression, debug); // Expect 9
+            Tree testTree = new Tree(expression, debug);
 
-            Console.WriteLine($"Expression {expression} Passed: {(testTree.Calculate() == expected)}");
+            string result = testTree.Calculate().ToString();
+
+            Console.WriteLine($"Expression {expression} Passed: {result == expected}");
+
+            return result == expected;
 
         }
 
@@ -123,22 +90,53 @@ namespace MathsAbstractions{
 
             }
 
-            bool settingLeft = true;
+            bool settingOperandOne = true;
 
             int operandTwoConsumerIndex = -1; // -1 denotes there is no set operandTwoConsumer
 
+            int lastSingleSidedOperatorIndex = -1;
+
+            if (debug){
+
+                Console.WriteLine("Generation beginning:");
+
+            }
+
             for (int i = 0 ; i < expression.Count ; i++){
 
-                if (debug){
+                if (expression[i].operandData == Operation.OperatorInfo.OPERANDDIVIDER){
 
-                    for (int o = 0 ; o < expression.Count ; o++){
+                    if (lastSingleSidedOperatorIndex != -1){
 
-                        Console.WriteLine(expression[o].ToString());
-                        Console.WriteLine("\n");
+                        if (expression.Count - 1 > i){
+
+                            if (expression[i + 1].priority < expression[lastSingleSidedOperatorIndex].priority){
+
+                                expression[i + 1].operandOne = new Operation.Operand(expression[lastSingleSidedOperatorIndex]);
+
+                                expression[lastSingleSidedOperatorIndex].operandTwo = new Operation.Operand(operands.Pop());
+
+                                settingOperandOne = false;
+
+                            }
+                            else{
+
+                                expression[lastSingleSidedOperatorIndex].operandTwo = new Operation.Operand(expression[i + 1]);
+
+                            }
+
+                        }
+                        else{
+                            
+                            expression[lastSingleSidedOperatorIndex].operandTwo = new Operation.Operand(operands.Pop());
+                            
+                        }
 
                     }
+                    
+                    operatorsToRemove.Add(i);
 
-                    Console.WriteLine("\n\n\n\n");
+                    continue;
 
                 }
 
@@ -148,7 +146,7 @@ namespace MathsAbstractions{
 
                     operandTwoConsumerIndex = -1;
 
-                    settingLeft = true;
+                    settingOperandOne = true;
 
                     if (expression.Count - 1 > i){
 
@@ -161,16 +159,16 @@ namespace MathsAbstractions{
                 }
                 else if (expression[i].operandData == Operation.OperatorInfo.BRACKETCLOSE){
 
-                    operandTwoConsumerIndex = bracketQueue.Pop().Item2;
+                    (int, int) previousState = bracketQueue.Pop();
+
+                    operandTwoConsumerIndex = previousState.Item2;
 
                     operatorsToRemove.Add(i);
-
-                    settingLeft = false;
 
                     if (expression.Count - 1 > i){
 
                         expression[i + 1].operandOne = new Operation.Operand(expression[operandTwoConsumerIndex]);
-                        
+
                         if (bracketQueue.Count > 0){
 
                             expression[bracketQueue.Peek().Item1].operandTwo = new Operation.Operand(expression[i + 1]);
@@ -179,17 +177,35 @@ namespace MathsAbstractions{
 
                     }
 
+                    settingOperandOne = false;
+
                     continue;
 
                 }
 
-                if (settingLeft){
+                if (expression[i].operandData == Operation.OperatorInfo.RIGHTRIGHT){
+
+                    lastSingleSidedOperatorIndex = i;
+                    
+                    if (expression.Count - 1 > i){
+
+                        if (expression[i + 1].operandData != Operation.OperatorInfo.OPERANDDIVIDER){
+
+                            settingOperandOne = false;
+
+                        }
+
+                    }
+
+                }
+
+                if (settingOperandOne){
 
                     expression[i].operandOne = new Operation.Operand(operands.Pop());
 
                 }
 
-                settingLeft = true;
+                settingOperandOne = true;
 
                 if (expression.Count - 1 > i){
 
@@ -214,13 +230,27 @@ namespace MathsAbstractions{
 
                         }
 
-                        settingLeft = false;
+                        settingOperandOne = false;
 
                     }
                     else{
+
+                        if (expression[i].operandData == Operation.OperatorInfo.RIGHTRIGHT){
+
+                            if (expression[i + 1].operandData == Operation.OperatorInfo.BRACKETOPEN){
+
+                                expression[i].operandOne = new Operation.Operand(expression[i + 1]);
+
+                                operandTwoConsumerIndex = i;
+
+                            }
+
+                            continue;
+
+                        }
                         
                         if (expression[i + 1].operandData != Operation.OperatorInfo.BRACKETCLOSE){
-
+                            
                             expression[i].operandTwo = new Operation.Operand(expression[i + 1]);
 
                             operandTwoConsumerIndex = i;
@@ -237,11 +267,6 @@ namespace MathsAbstractions{
                     if (expression[operandTwoConsumerIndex].priority >= expression[i].priority){
 
                         expression[i].operandOne = new Operation.Operand(expression[operandTwoConsumerIndex]);
-
-                    }
-                    else{
-
-                        expression[i].operandTwo = new Operation.Operand(operands.Pop());
 
                     }
 
@@ -304,6 +329,12 @@ namespace MathsAbstractions{
 
                 if (!double.TryParse(components[i], out _)){ // If parsing fails, the value is an operator
 
+                    if (components[i].Split('_').Length == 2){ // Only contains symbol and operand type
+
+                        continue;
+
+                    }
+
                     operationIndexBuffer.Add(i);
 
                     expression.Add(
@@ -355,20 +386,6 @@ namespace MathsAbstractions{
 
         public readonly OperatorInfo operandData;
 
-        private bool hasLeft
-        {
-            get{
-                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.LEFTLEFT;
-            }
-        }
-
-        private bool hasRight
-        {
-            get{
-                return operandData == OperatorInfo.LEFTRIGHT || operandData == OperatorInfo.RIGHTRIGHT || operandData == OperatorInfo.BRACKETOPEN;
-            }
-        }
-
         private readonly int opcode;
 
         public static bool debug;
@@ -391,6 +408,12 @@ namespace MathsAbstractions{
             string[] operationComponents = operation.Split('_'); // 0: symbol, 1: priority, 2: operand info
 
             priority = byte.Parse(operationComponents[1]);
+
+            if (debug){
+
+                Console.WriteLine(operationComponents[2]);
+
+            }
 
             switch (operationComponents[2]){ // Operand info
 
@@ -419,6 +442,10 @@ namespace MathsAbstractions{
                     return;
                 
                 case "6":
+                    operandData = OperatorInfo.OPERANDDIVIDER;
+                    return;
+
+                case "7":
                     operandData = OperatorInfo.CONSTANT;
                     break;
 
@@ -475,21 +502,13 @@ namespace MathsAbstractions{
 
         public int CountOperandReferences(){
 
-            int references = 1; // Start with 1 to account for itself
+            if (operandData == OperatorInfo.BRACKETCLOSE){
 
-            if (hasLeft && !operandOne.isConstant){
-
-                references += operandOne.childReferenceCount;
+                return 0;
 
             }
 
-            if (hasRight && !operandTwo.isConstant){
-
-                references += operandTwo.childReferenceCount;
-
-            }
-
-            return references;
+            return 1 + operandOne.childReferenceCount + operandTwo.childReferenceCount;
 
         }
 
@@ -545,7 +564,7 @@ namespace MathsAbstractions{
 
         public override string ToString(){
 
-            return $"Priority: {priority}\nHas Left: {hasLeft}\nHas Right: {hasRight}\nOpcode: {opcode}\nLeft Is Constant: {operandOne.isConstant}\nRight Is Constant: {operandTwo.isConstant}";
+            return $"Priority: {priority}\nOperand Info: {operandData}\nOpcode: {opcode}\nLeft Is Constant: {operandOne.isConstant}\nRight Is Constant: {operandTwo.isConstant}";
 
         }
 
@@ -556,6 +575,7 @@ namespace MathsAbstractions{
             FUNCTION,
             BRACKETOPEN,
             BRACKETCLOSE,
+            OPERANDDIVIDER,
             CONSTANT
         }
 
@@ -565,9 +585,7 @@ namespace MathsAbstractions{
             public double value
             {
                 get{
-                    if (referenceValue == null)
-                        return constantValue;
-                    return referenceValue.Calculate();
+                    return referenceValue == null ? constantValue : referenceValue.Calculate();
                 }
             }
             public bool isConstant{
@@ -578,13 +596,37 @@ namespace MathsAbstractions{
             public int childReferenceCount
             {
                 get{
-                    if (!isConstant)
-                        return referenceValue.CountOperandReferences();
-                    return 0; // 1 instead of 0 as the operand itself needs to be counted for
+                    return isConstant ? 0 : referenceValue.CountOperandReferences();
                 }
             }
 
-            public Operand(string constant) : this() => constantValue = (double)double.Parse(constant);
+            public Operand(string constant) : this(){
+
+                double value;
+
+                if (!double.TryParse(constant, out value)){
+
+                    switch (constant.Split('_')[0]){ // Assign constants
+
+                        case "e":
+                            value = Math.E;
+                            break;
+                        
+                        case "pi":
+                            value = Math.PI;
+                            break;
+                        
+                        case "c":
+                            value = 300_000_000;
+                            break;
+
+                    }
+
+                }
+
+                constantValue = value;
+
+            }
 
             public Operand(Operation operationRef) : this() => referenceValue = operationRef;
         }

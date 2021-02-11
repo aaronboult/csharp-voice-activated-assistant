@@ -1,5 +1,4 @@
 using System;
-using MathsAbstractions;
 
 namespace Control
 {
@@ -7,21 +6,11 @@ namespace Control
 
         private static void Main(string[] args){
 
-            // RunTests();
+            TestController.RunAllTests();
 
-            VoiceController voice = new VoiceController();
+            // VoiceController voice = new VoiceController();
 
-            voice.Listen();
-
-        }
-
-        private static void RunTests(){
-
-            // Command.__TestExpressionParser__();
-
-            // Tree.__TestTreeConstructor__();
-
-            // NumericalWordParser.__TestWordParser__();
+            // voice.Listen();
 
         }
 

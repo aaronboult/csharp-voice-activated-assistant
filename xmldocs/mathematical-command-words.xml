@@ -5,7 +5,10 @@
         1 - left left
         2 - right right
         3 - symbol
-        4 - wrapper
+        4 - open bracket
+        5 - close bracket
+        6 - operand separator
+        7 - constant
     priority:
         0 - highest (brackets)
         ...
@@ -45,9 +48,6 @@
         <word>squared</word>
         <word>SQ</word>
     </squared>
-
-    <!-- To add opcodes for -->
-
     <squareroot symbol="rt" priority="2" operandIdentifier="0" loperand="2">
         <word>square root</word>
         <word>sqrt</word>
@@ -66,15 +66,20 @@
         <word>raised to</word>
         <word>to the</word>
     </power>
-    <log symbol="log" priority="2" operandIdentifier="1" roperand="10">
+    <log symbol="log" priority="2" operandIdentifier="2" roperand="10 ,_3_6">
         <word>log</word>
-    </log>
-    <log symbol="log" priority="2" operandIdentifier="1">
-        <word>log base</word>
         <word>log of</word>
     </log>
-    <ln symbol="ln" priority="2" operandIdentifier="1">
+    <log symbol="log" priority="2" operandIdentifier="2">
+        <word>log base</word>
+    </log>
+    <ln symbol="log" roperand="e_6 ,_3_6" priority="2" operandIdentifier="2">
         <word>ln</word>
         <word>natural log</word>
+        <word>ln of</word>
+        <word>natural log of</word>
     </ln>
+    <of symbol="," priority="3" operandIdentifier="6">
+        <word>of</word>
+    </of>
 </xml>
