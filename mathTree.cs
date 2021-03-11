@@ -133,7 +133,12 @@ namespace MathsAbstractions{
                         }
 
                     }
-                    
+                    else if (operandTwoConsumerIndex >= 0){
+
+                        settingOperandOne = false;
+
+                    }
+
                     operatorsToRemove.Add(i);
 
                     continue;
@@ -250,12 +255,16 @@ namespace MathsAbstractions{
                         }
                         
                         if (expression[i + 1].operandData != Operation.OperatorInfo.BRACKETCLOSE){
-                            
-                            expression[i].operandTwo = new Operation.Operand(expression[i + 1]);
 
                             operandTwoConsumerIndex = i;
 
-                            continue;
+                            if (expression[i + 1].operandData != Operation.OperatorInfo.OPERANDDIVIDER){
+                            
+                                expression[i].operandTwo = new Operation.Operand(expression[i + 1]);
+
+                                continue;
+
+                            }
 
                         }
 

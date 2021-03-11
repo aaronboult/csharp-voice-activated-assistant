@@ -91,6 +91,28 @@ namespace Managers{
 
         }
 
+        public static XmlNodeList GetFirstLevelNodeChildren(string documentName, string name){
+
+            XmlDocument document = LoadDocument(documentName);
+
+            return GetFirstLevelNodeChildren(name, ref document);
+
+        }
+
+        public static XmlNodeList GetFirstLevelNodeChildren(string name, ref XmlDocument document){
+
+            (bool success, XmlNode node) match = XmlManager.GetFirstLevelChild(name, ref document, "name");
+
+            if (!match.success){
+
+                return null;
+
+            }
+
+            return match.node.ChildNodes;
+
+        }
+
     }
 
 }

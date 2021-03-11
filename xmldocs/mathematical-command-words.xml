@@ -44,12 +44,12 @@
         <word>by</word>
     </division>
     <squared symbol="^" priority="2" operandIdentifier="0" roperand="2">
-        <word>square</word>
         <word>squared</word>
         <word>SQ</word>
     </squared>
     <squareroot symbol="rt" priority="2" operandIdentifier="0" loperand="2">
         <word>square root</word>
+        <word>square root of</word>
         <word>sqrt</word>
     </squareroot>
     <cuberoot symbol="rt" priority="2" operandIdentifier="0" loperand="3">

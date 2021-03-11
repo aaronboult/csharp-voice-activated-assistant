@@ -48,7 +48,15 @@ namespace Control{
         /// <param name="command">The command to carry out</param>
         public Command(string command, bool debug = false){
 
-            this.command = command.ToLower();
+            this.command = command.Trim().ToLower();
+
+            string tempCommand = this.command;
+
+            while ((this.command = this.command.Replace("  ", " ")) != tempCommand){
+
+                tempCommand = this.command;
+
+            }
 
             this.debug = debug;
 
@@ -78,7 +86,7 @@ namespace Control{
                         parseResult = result.ToString();
                     }
                     else{
-                        parseResult = $"The result of {decodedCommand.expression} is {result}";
+                        parseResult = $"The result of {command} is {result}";
                     }
                     break;
                 
@@ -177,7 +185,13 @@ namespace Control{
 
             XmlDocument commandWords = XmlManager.LoadDocument("mathematical-command-words.xml");
 
-            XmlDocument queryIdentifiers = XmlManager.LoadDocument("query-identifiers.xml");
+            XmlNodeList mathsIdentifiers = XmlManager.GetFirstLevelNodeChildren("query-identifiers.xml", "maths-question-words");
+
+            if (mathsIdentifiers == null){
+
+                return (false, null);
+
+            }
 
             List<string> filteredCommand = NumericalWordParser.ParseAllNumericalWords(this.command).Split(' ').ToList();
 
@@ -187,17 +201,37 @@ namespace Control{
 
             }
 
-            while (filteredCommand.Count > 0){
+            int identifierOffset = 0;
 
-                if (IsQueryIdentifier(filteredCommand[0], ref queryIdentifiers)){
+            string currentIdentifier = "";
 
-                    filteredCommand.RemoveAt(0);
+            while (filteredCommand.Count > 0 && identifierOffset < filteredCommand.Count){
+
+                if (currentIdentifier != ""){
+
+                    currentIdentifier += " ";
+
+                }
+
+                currentIdentifier += filteredCommand[identifierOffset];
+
+                if (IsQueryIdentifier(currentIdentifier, mathsIdentifiers)){
+                    
+                    for (int i = 0 ; i < identifierOffset + 1 ; i++){
+
+                        filteredCommand.RemoveAt(0);
+
+                    }
+
+                    identifierOffset = 0;
+
+                    currentIdentifier = "";
 
                     continue;
 
                 }
-
-                break;
+                
+                identifierOffset++;
 
             }
 
@@ -282,7 +316,7 @@ namespace Control{
                         (bool isKeyword, string operation, string matchedKeyword) keyword = IsMathsKeyword(ref commandWords, previousWords[i]);
 
                         if (keyword.isKeyword){
-
+                            
                             keywordMatched = true;
 
                             awaitingMatch = false;
@@ -310,7 +344,7 @@ namespace Control{
                         }
 
                     }
-
+                    
                     if (!keywordMatched){
 
                         awaitingMatch = true;
@@ -391,9 +425,9 @@ namespace Control{
 
         }
 
-        private static bool IsQueryIdentifier(string word, ref XmlDocument lookup){
+        private static bool IsQueryIdentifier(string word, XmlNodeList lookup){
 
-            return XmlManager.GetSecondLevelChild(word, ref lookup).Item1;
+            return XmlManager.GetMatchInNodeList(word, lookup).Item1;
 
         }
 
@@ -407,17 +441,13 @@ namespace Control{
 
             Console.WriteLine("Parsing information lookup");
 
-            XmlDocument queryIdentifiers = XmlManager.LoadDocument("query-identifiers.xml");
+            XmlNodeList questionWords = XmlManager.GetFirstLevelNodeChildren("query-identifiers.xml", "question-words");
 
-            XmlNode questionWordsNode = XmlManager.GetFirstLevelChild("question-words", ref queryIdentifiers, "name").Item2;
-
-            if (questionWordsNode == null){
+            if (questionWords == null){
 
                 return (false, null);
 
             }
-
-            XmlNodeList questionWords = questionWordsNode.ChildNodes;
 
             string[] commandComponents = command.Split(' ');
 
@@ -467,7 +497,7 @@ namespace Control{
                 }
                 else{
 
-                    if (afterParams != "" && afterParams.Length > (tempInformation.Length + value.Length)){
+                    if (afterParams != "" && afterParams.Length >= (tempInformation.Length + value.Length)){
 
                         if (afterParams.Substring(0, tempInformation.Length + value.Length) == tempInformation + value){
 
@@ -504,7 +534,7 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"Information: '{information}'\nSuccess: {informationStarted}");
+                Console.WriteLine($"AfterParams: '{afterParams}'\nInformation: '{information}'\nSuccess: {informationStarted}");
 
             }
 

@@ -41,6 +41,12 @@ namespace Control{
 
             }
 
+            if (contents.ToLower() == $"{term} may refer to:"){
+
+                return "";
+
+            }
+            
             return contents;
 
         }

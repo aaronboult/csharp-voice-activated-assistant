@@ -45,11 +45,17 @@ namespace Control{
 
             (bool success, XmlNode nodeList) testMatch = XmlManager.GetFirstLevelChild(listName, ref testDocument, "name");
 
+            if (testMatch.nodeList.Attributes["run"].Value == "false"){
+
+                return true;
+
+            }
+
             bool passed = true;
 
             if (testMatch.success){
 
-                foreach (XmlNode node in testMatch.nodeList){
+                foreach (XmlNode node in testMatch.nodeList.ChildNodes){
 
                     bool success = callback(
                         node.Attributes[targetInputAttribute].Value, 

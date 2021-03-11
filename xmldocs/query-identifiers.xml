@@ -6,7 +6,13 @@
         <word>is</word>
         <word>what is</word>
         <word>what is a</word>
+        <word after-param-word="mean">what does</word>
     </word-group>
     <word-group name="maths-question-words">
+        <word>what's</word>
+        <word>whats</word>
+        <word>what is</word>
+        <word>what is the</word>
+        <word>what is the value of</word>
     </word-group>
 </xml>

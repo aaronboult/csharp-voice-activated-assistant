@@ -22,12 +22,6 @@ namespace Control{
 
         public void Listen(){
 
-            if (debug){
-
-                Console.WriteLine("Starting...");
-
-            }
-
             using (synthesiser = new SpeechSynthesizer())
             using (
                 SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(
@@ -43,18 +37,18 @@ namespace Control{
                 recognizer.SetInputToDefaultAudioDevice();
 
                 recognizer.RecognizeAsync(RecognizeMode.Multiple);
-
-                if (debug){
-
-                    Console.WriteLine("Listener up");
-
-                }
+                
+                Console.WriteLine("Hello! How may I help?");
 
                 while (!terminate){
 
                     string input = Console.ReadLine();
 
-                    TryExecuteCommand(input);
+                    if (input != ""){
+
+                        TryExecuteCommand(input);
+
+                    }
 
                 }
 
