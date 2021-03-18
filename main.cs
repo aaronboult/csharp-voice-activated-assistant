@@ -1,4 +1,5 @@
 using System;
+using Managers;
 
 namespace Control
 {
@@ -6,7 +7,7 @@ namespace Control
 
         private static void Main(string[] args){
 
-            TestController.RunAllTests();
+            // TestController.RunAllTests();
 
             // VoiceController voice = new VoiceController();
 

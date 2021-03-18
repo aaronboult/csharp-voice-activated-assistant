@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -27,6 +28,24 @@ namespace Managers{
             }
 
             return loadedDocument;
+
+        }
+
+        public static Dictionary<string, string> GetMapFromDocument(XmlNodeList nodes, string key, string value){
+
+            Dictionary<string, string> map = new Dictionary<string, string>();
+
+            foreach (XmlNode node in nodes){
+
+                if (node.Attributes[key] != null & node.Attributes[value] != null){
+
+                    map.Add(node.Attributes[key].Value, node.Attributes[value].Value);
+
+                }
+
+            }
+
+            return map;
 
         }
 
