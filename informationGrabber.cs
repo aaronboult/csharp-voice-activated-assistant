@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.IO;
 using System.Xml;
+using GUI;
 
-namespace Control{
+namespace Parsing{
 
     class InformationGrabber{
 
@@ -20,7 +21,7 @@ namespace Control{
 
             InformationGrabber grabber = new InformationGrabber();
 
-            Console.WriteLine(grabber.SearchForTerm("tennis", debug));
+            GUIController.LogOutput(grabber.SearchForTerm("tennis", debug));
 
         }
 

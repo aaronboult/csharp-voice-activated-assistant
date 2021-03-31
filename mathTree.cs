@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using GUI;
 
-namespace MathsAbstractions{
+// -- TODO -- Bug where a single value enclosed in brackets evaluates to 0
+
+namespace Parsing{
 
     /// <summary>
     /// A collection of ordered components in an expression based on BIDMAS
@@ -25,7 +28,7 @@ namespace MathsAbstractions{
 
             string result = testTree.Calculate().ToString();
 
-            Console.WriteLine($"Expression {expression} Passed: {result == expected}");
+            GUIController.LogOutput($"Expression {expression} Passed: {result == expected}");
 
             return result == expected;
 
@@ -44,7 +47,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine($"Generating tree with equation: '{equation}'");
+                GUIController.LogOutput($"Generating tree with equation: '{equation}'");
 
             }
 
@@ -80,7 +83,7 @@ namespace MathsAbstractions{
 
                     if (debug){
                         
-                        Console.WriteLine($"Pushing {components[i]} to operand stack");
+                        GUIController.LogOutput($"Pushing {components[i]} to operand stack");
 
                     }
 
@@ -98,7 +101,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine("Generation beginning:");
+                GUIController.LogOutput("Generation beginning:");
 
             }
 
@@ -285,7 +288,7 @@ namespace MathsAbstractions{
                         
                         if (debug){
                             
-                            Console.WriteLine("No more operands");
+                            GUIController.LogOutput("No more operands");
 
                         }
 
@@ -310,9 +313,9 @@ namespace MathsAbstractions{
 
                 if (debug){
 
-                    Console.WriteLine(expression[i].ToString());
+                    GUIController.LogOutput(expression[i].ToString());
 
-                    Console.WriteLine($"Comparing Count: {expression.Count} with CountedRefs: {expression[i].CountOperandReferences()}\n------------------------------------");
+                    GUIController.LogOutput($"Comparing Count: {expression.Count} with CountedRefs: {expression[i].CountOperandReferences()}\n------------------------------------");
 
                 }
 
@@ -366,7 +369,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine("\n\n\nCalculating:\n");
+                GUIController.LogOutput("\n\n\nCalculating:\n");
 
             }
             
@@ -374,7 +377,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine(
+                GUIController.LogOutput(
                     $"Entry at: {entryIndex}\nValue: {value}"
                 );
 
@@ -420,7 +423,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine(operationComponents[2]);
+                GUIController.LogOutput(operationComponents[2]);
 
             }
 
@@ -529,9 +532,9 @@ namespace MathsAbstractions{
 
             if (debug){
                 
-                Console.WriteLine(this.ToString());
+                GUIController.LogOutput(this.ToString());
 
-                Console.WriteLine($"Using Opcode: {opcode}\nLeft: {valueOne}\nRight: {valueTwo}\n---------------------------------------------------------------------");
+                GUIController.LogOutput($"Using Opcode: {opcode}\nLeft: {valueOne}\nRight: {valueTwo}\n---------------------------------------------------------------------");
 
             }
 

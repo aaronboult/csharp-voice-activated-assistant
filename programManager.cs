@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using System.Diagnostics;
+using GUI;
 
 namespace Managers{
 
@@ -75,38 +76,6 @@ namespace Managers{
 
         }
 
-        public static string GetPathFromName(string name){
-
-            string path = "";
-
-            if (programMap.ContainsKey(name)){
-
-                path = programMap[name];
-
-            }
-
-            return path;
-
-        }
-
-        public static string[] GetNameFromPath(string path){
-
-            List<string> names = new List<string>();
-
-            foreach (KeyValuePair<string, string> pair in programMap){
-
-                if (pair.Value == path){
-
-                    names.Add(pair.Key);
-
-                }
-
-            }
-
-            return names.ToArray();
-
-        }
-
         static void SaveConfig(){
 
             string xmlBody = "";
@@ -133,7 +102,7 @@ namespace Managers{
 
             if (programMap.ContainsKey(name)){
 
-                Console.WriteLine(programMap[name]);
+                GUIController.LogOutput(programMap[name]);
 
                 try{
 

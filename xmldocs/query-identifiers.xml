@@ -15,4 +15,9 @@
         <word>what is the</word>
         <word>what is the value of</word>
     </word-group>
+    <word-group name="program-execution-words">
+        <word>open</word>
+        <word>run</word>
+        <word>execute</word>
+    </word-group>
 </xml>

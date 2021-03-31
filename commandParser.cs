@@ -2,10 +2,10 @@ using System;
 using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
-using MathsAbstractions;
 using Managers;
+using GUI;
 
-namespace Control{
+namespace Parsing{
 
     class Command{
 
@@ -17,11 +17,11 @@ namespace Control{
             
             if (debug){
 
-                Console.WriteLine($"Expected: {expected}\nOutput: {output}");
+                GUIController.LogOutput($"Expected: {expected}\nOutput: {output}");
 
             }
 
-            Console.WriteLine($"Expression {expression} Passed: {(output == expected)}");
+            GUIController.LogOutput($"Expression {expression} Passed: {(output == expected)}");
 
             return output == expected;
 
@@ -107,6 +107,8 @@ namespace Control{
                     break;
 
                 case CommandType.PROGRAM_EXECUTION:
+                    bool success = ProgramManager.OpenProgram(decodedCommand.expression);
+                    parseResult = $"{decodedCommand.expression} opened successfully: {success}";
                     break;
 
             }
@@ -123,15 +125,15 @@ namespace Control{
             
             if (!decodeAttempt.success){
 
-                type = CommandType.INFORMATION_LOOKUP;
+                type = CommandType.PROGRAM_EXECUTION;
 
-                decodeAttempt = this.TryParseInformationLookup();
+                decodeAttempt = this.TryParseProgramExecution();
 
                 if (!decodeAttempt.success){
                     
-                    type = CommandType.PROGRAM_EXECUTION;
+                    type = CommandType.INFORMATION_LOOKUP;
 
-                    decodeAttempt = this.TryParseProgramExecution();
+                    decodeAttempt = this.TryParseInformationLookup();
 
                     if (!decodeAttempt.success){
 
@@ -153,6 +155,7 @@ namespace Control{
 
         }
 
+        // Debug functions
         public static void DisplayArray(List<string> list) => DisplayArray(list.ToArray());
 
         public static void DisplayArray(string[] array){
@@ -173,7 +176,7 @@ namespace Control{
 
             output += "]";
 
-            Console.WriteLine(output);
+            GUIController.LogOutput(output);
 
         }
 
@@ -365,7 +368,7 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"Equation: '{equation}'");
+                GUIController.LogOutput($"Equation: '{equation}'");
 
             }
 
@@ -439,7 +442,7 @@ namespace Control{
 
         private (bool, string) TryParseInformationLookup(){
 
-            Console.WriteLine("Parsing information lookup");
+            GUIController.LogOutput("Parsing information lookup");
 
             XmlNodeList questionWords = XmlManager.GetFirstLevelNodeChildren("query-identifiers.xml", "question-words");
 
@@ -534,7 +537,7 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"AfterParams: '{afterParams}'\nInformation: '{information}'\nSuccess: {informationStarted}");
+                GUIController.LogOutput($"AfterParams: '{afterParams}'\nInformation: '{information}'\nSuccess: {informationStarted}");
 
             }
 
@@ -566,7 +569,42 @@ namespace Control{
 
         private (bool, string) TryParseProgramExecution(){
 
-            return (false, null);
+            XmlNodeList executionKeywords = XmlManager.GetFirstLevelNodeChildren("query-identifiers.xml", "program-execution-words");
+
+            if (executionKeywords == null){
+                
+                return (false, null);
+
+            }
+
+            string[] commandComponents = command.Split(' ');
+
+            bool nameStarted = false;
+
+            string name = "";
+
+            foreach (string value in commandComponents){
+
+                if (nameStarted){
+
+                    name += $"{(name == "" ? "" : " ")}{value}";
+
+                }
+                else if (IsProgramExecutionKeyword(value, executionKeywords)){
+
+                    nameStarted = true;
+
+                }
+
+            }
+
+            return (name != "", name);
+
+        }
+
+        private bool IsProgramExecutionKeyword(string value, XmlNodeList lookup){
+
+            return XmlManager.GetMatchInNodeList(value, lookup).Item1;
 
         }
 

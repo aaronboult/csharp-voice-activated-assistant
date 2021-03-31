@@ -1,9 +1,10 @@
 using System;
 using System.Xml;
 using Managers;
-using MathsAbstractions;
+using Parsing;
+using GUI;
 
-namespace Control{
+namespace Testing{
 
     static class TestController{
 
@@ -29,7 +30,7 @@ namespace Control{
 
             if (passed){
 
-                Console.WriteLine("Passed all tests!");
+                GUIController.LogOutput("Passed all tests!");
 
             }
 
@@ -71,7 +72,7 @@ namespace Control{
 
             if (!passed){
 
-                Console.WriteLine($"Test {listName} FAILED");
+                GUIController.LogOutput($"Test {listName} FAILED");
 
             }
 

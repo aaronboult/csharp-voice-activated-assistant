@@ -1,6 +1,8 @@
 using System;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
+using Parsing;
+using GUI;
 
 namespace Control{
 
@@ -8,11 +10,7 @@ namespace Control{
 
         private bool debug;
 
-        private bool terminate;
-
         private SpeechSynthesizer synthesiser;
-
-        public bool speakOutput = false;
 
         public VoiceController(bool debug = false){
 
@@ -38,11 +36,11 @@ namespace Control{
 
                 recognizer.RecognizeAsync(RecognizeMode.Multiple);
                 
-                Console.WriteLine("Hello! How may I help?");
+                GUIController.LogOutput("Hello! How may I help?", bold: true, prefix: "");
 
-                while (!terminate){
+                while (MainGUI.Opened){
 
-                    string input = Console.ReadLine();
+                    string input = MainGUI.Reference.InputValue; // Value stored as its cleared once read
 
                     if (input != ""){
 
@@ -60,7 +58,7 @@ namespace Control{
 
             if (debug){
 
-                Console.WriteLine($"Recognized: {e.Result.Text}\nComfidence: {e.Result.Confidence}");
+                GUIController.LogOutput($"Recognized: {e.Result.Text}\nComfidence: {e.Result.Confidence}");
 
             }
 
@@ -70,13 +68,23 @@ namespace Control{
 
         private void TryExecuteCommand(string commandText, bool voice = false){
 
-            if (commandText.Split(' ')[0].ToLower() != "cake" && voice){
+            if (voice){
 
-                return;
+                if (!MainGUI.Reference.microphoneToggle){
+
+                    return;
+
+                }
+
+                GUIController.LogOutput($"Voice Detected: {commandText}");
+
+                if (commandText.Split(' ')[0].ToLower() != "cake"){
+
+                    return; // If the command word does not match, return
+
+                }
 
             }
-
-            Console.WriteLine($"Executing {commandText}");
 
             try{
 
@@ -84,9 +92,9 @@ namespace Control{
 
                 string result = command.Execute();
 
-                Console.WriteLine(result);
+                GUIController.LogOutput(result);
 
-                if (speakOutput){
+                if (MainGUI.Reference.voiceOutputToggle){
 
                     synthesiser.Speak(result);
 
@@ -95,7 +103,7 @@ namespace Control{
             }
             catch{
 
-                terminate = true;
+                GUIController.LogOutput("An error occurred when processing that request.");
 
             }
 

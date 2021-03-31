@@ -1,8 +1,9 @@
 using System;
 using System.Xml;
 using Managers;
+using GUI;
 
-namespace MathsAbstractions{
+namespace Parsing{
 
     static class NumericalWordParser{
 
@@ -22,7 +23,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine($"Parsing: {phrase}\nExpected: {expected}\nGot: {result}\nDifference: {difference}");
+                GUIController.LogOutput($"Parsing: {phrase}\nExpected: {expected}\nGot: {result}\nDifference: {difference}");
 
             }
 
@@ -30,14 +31,14 @@ namespace MathsAbstractions{
             // incorrect calculations from floating point error calculations
             if (difference != 0 && difference < 0.00000000000000001){
 
-                Console.WriteLine("Phrase: {phrase}, Passed: True (floating point inaccuracy)");
+                GUIController.LogOutput("Phrase: {phrase}, Passed: True (floating point inaccuracy)");
 
                 return true;
 
             }
             else{
 
-                Console.WriteLine($"Phrase: {phrase}, Passed: {result.ToString() == expected}");
+                GUIController.LogOutput($"Phrase: {phrase}, Passed: {result.ToString() == expected}");
 
                 return result.ToString() == expected;
 
@@ -131,7 +132,7 @@ namespace MathsAbstractions{
 
                 if (debug){
 
-                    Console.WriteLine(multiPlaceValue);
+                    GUIController.LogOutput(multiPlaceValue);
 
                 }
 
@@ -170,9 +171,9 @@ namespace MathsAbstractions{
 
                 if (debug){
 
-                    Console.WriteLine(nextPlaceCheckOffset);
+                    GUIController.LogOutput(nextPlaceCheckOffset);
 
-                    Console.WriteLine(decimalToggle);
+                    GUIController.LogOutput(decimalToggle);
 
                 }
 
@@ -182,7 +183,7 @@ namespace MathsAbstractions{
 
                     if (debug){
 
-                        Console.WriteLine($"UpcommingMatch: {upcomingMatch}");
+                        GUIController.LogOutput($"UpcommingMatch: {upcomingMatch}");
 
                     }
 
@@ -194,7 +195,7 @@ namespace MathsAbstractions{
 
                 if (debug){
 
-                    Console.WriteLine(match);
+                    GUIController.LogOutput(match);
 
                 }
 
@@ -281,7 +282,7 @@ namespace MathsAbstractions{
 
                 if (debug){
 
-                    Console.WriteLine($"\n\n\n\nNumber: {number}\nPlace: {place}\nAccumulator: {accumulator}\n\n\n\n");
+                    GUIController.LogOutput($"\n\n\n\nNumber: {number}\nPlace: {place}\nAccumulator: {accumulator}\n\n\n\n");
 
                 }
 
@@ -297,7 +298,7 @@ namespace MathsAbstractions{
 
                     if (debug){
 
-                        Console.WriteLine(
+                        GUIController.LogOutput(
                             $"Adding to accumulator\nNumber: {number}\nPlace: {place}\nChained Place: {chainedPlaceValue}\nMulti Place: {multiPlaceValue}\nLast: {lastIteration}"
                         );
 
@@ -325,7 +326,7 @@ namespace MathsAbstractions{
 
             if (debug){
 
-                Console.WriteLine(accumulator);
+                GUIController.LogOutput(accumulator);
                 
             }
 

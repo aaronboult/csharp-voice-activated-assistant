@@ -15,18 +15,22 @@
         3 - lowest (add, subtract)
 -->
     <open-bracket symbol="(" priority="3" operandIdentifier="4">
+        <word>(</word>
         <word>open bracket</word>
     </open-bracket>
     <close-bracket symbol=")" priority="3" operandIdentifier="5">
+        <word>)</word>
         <word>close bracket</word>
     </close-bracket>
     <addition symbol="+" priority="0" operandIdentifier="0">
+        <word>+</word>
         <word>add</word>
         <word>plus</word>
         <word>and</word>
         <word>more than</word>
     </addition>
     <subtraction symbol="-" priority="0" operandIdentifier="0">
+        <word>-</word>
         <word>subtract</word>
         <word>minus</word>
         <word>less</word>
@@ -34,11 +38,13 @@
         <word>take</word>
     </subtraction>
     <multiplication symbol="*" priority="1" operandIdentifier="0">
+        <word>*</word>
         <word>times</word>
         <word>multiplied by</word>
         <word>lots of</word>
     </multiplication>
     <division symbol="/" priority="1" operandIdentifier="0">
+        <word>/</word>
         <word>divided by</word>
         <word>over</word>
         <word>by</word>
@@ -62,6 +68,7 @@
         <word>rt</word>
     </root>
     <power symbol="^" priority="2" operandIdentifier="0">
+        <word>^</word>
         <word>to the power of</word>
         <word>raised to</word>
         <word>to the</word>
