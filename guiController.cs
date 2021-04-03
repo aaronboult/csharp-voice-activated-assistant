@@ -324,7 +324,6 @@ namespace GUI{
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 25f));
-            table.CellPaint += new TableLayoutCellPaintEventHandler(Table_OnCellPaint);
 
             // Add table headings
             table.Controls.Add(GenerateTableHeading("Select"), 0, 0);
@@ -369,7 +368,9 @@ namespace GUI{
 
         private void GenerateTableRows(){
 
-            for (int i = 0 ; i < 5 ; i++){
+            string[] names = { "A", "B", "C", "D" };
+
+            for (int i = 0 ; i < names.Length ; i++){
 
                 table.RowCount += 1;
 
@@ -378,25 +379,6 @@ namespace GUI{
                 table.Controls.Add(GenerateTableHeading("C"), 2, -1);
 
             }
-
-        }
-
-        private void Table_OnCellPaint(object sender, TableLayoutCellPaintEventArgs e){
-
-            // System.Windows.Forms.Control c = table.GetControlFromPosition(e.Column, e.Row);
-
-            // if ( c != null )
-            // {
-            //     Graphics g = e.Graphics;
-
-            //     g.DrawRectangle(
-            //         Pens.Red, 
-            //         e.CellBounds.Location.X+1,
-            //         e.CellBounds.Location.Y + 1,
-            //         e.CellBounds.Width - 2, e.CellBounds.Height - 2
-            //     );
-
-            // };
 
         }
 
