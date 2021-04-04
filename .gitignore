@@ -1,3 +1,4 @@
+xmldocs/programs.config.xml
 main.exe
 *.code-workspace
 .vs/*

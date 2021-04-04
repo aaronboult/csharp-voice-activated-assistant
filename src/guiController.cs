@@ -150,12 +150,12 @@ namespace GUI{
             this.input = CreateControl<RichTextBox>(525, 30, 100, 400, AnchorStyles.Left | AnchorStyles.Right, 12);
             this.input.control.Multiline = false;
             this.input.control.BorderStyle = BorderStyle.FixedSingle;
-            this.input.control.KeyDown += new KeyEventHandler(this.Input_KeyDown);
 
             var sendButton = CreateControl<Button>(75, 29, 625, 400, AnchorStyles.Left | AnchorStyles.Right, 10);
             sendButton.Text = ">";
             sendButton.control.TextAlign = ContentAlignment.MiddleCenter;
             sendButton.control.Click += new EventHandler(this.SubmitButton_Clicked);
+            this.AcceptButton = sendButton.control;
 
             var clearButton = CreateControl<Button>(108, 75, 100, 475, AnchorStyles.Left, 10);
             clearButton.Text = "Clear Chatlog";
@@ -199,16 +199,6 @@ namespace GUI{
             MainGUI.Opened = false;
 
             Console.WriteLine("GUI thread closing");
-
-        }
-
-        public void Input_KeyDown(Object sender, KeyEventArgs e){
-
-            if (e.KeyCode == Keys.Return){
-
-                SubmitInput();
-
-            }
 
         }
 
