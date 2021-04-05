@@ -146,6 +146,7 @@ namespace GUI{
             this.output = CreateControl<RichTextBox>(600, 300, 100, 100, AnchorStyles.Left | AnchorStyles.Right, 12);
             this.Output.BorderStyle = BorderStyle.FixedSingle;
             this.Output.ReadOnly = true;
+            this.Output.Enter += new EventHandler(this.Output_Focused);
 
             this.input = CreateControl<RichTextBox>(525, 30, 100, 400, AnchorStyles.Left | AnchorStyles.Right, 12);
             this.input.control.Multiline = false;
@@ -202,6 +203,12 @@ namespace GUI{
 
         }
 
+        public void Output_Focused(Object sender, EventArgs e){
+
+            this.input.control.Focus();
+
+        }
+
         public void SubmitButton_Clicked(Object sender, EventArgs e){
 
             SubmitInput();
@@ -234,8 +241,6 @@ namespace GUI{
 
             microphoneButton.Text = microphoneToggle ? "Mute Microphone" : "Unmute Microphone";
 
-            GUIController.LogOutput(microphoneToggle);
-
         }
 
         public void VoiceOutputButton_Clicked(Object sender, EventArgs e){
@@ -243,8 +248,6 @@ namespace GUI{
             voiceOutputToggle = !voiceOutputToggle;
 
             voiceOutputButton.Text = voiceOutputToggle ? "Mute Output" : "Unmute Output";
-
-            GUIController.LogOutput(voiceOutputToggle);
 
         }
 
@@ -352,6 +355,8 @@ namespace GUI{
             label.control.TextAlign = ContentAlignment.MiddleCenter;
             label.control.Font = label.ConstructFont(fontSize: 8, bold: true);
 
+            table.RowCount += 1;
+
             return label.control;
 
         }
@@ -362,11 +367,21 @@ namespace GUI{
 
             for (int i = 0 ; i < names.Length ; i++){
 
-                table.RowCount += 1;
+                var checkbox = new GUIControlWrapper<CheckBox>();
+                checkbox.control.CheckAlign = ContentAlignment.MiddleCenter;
+                checkbox.SetAnchor(AnchorStyles.None);
 
-                table.Controls.Add(GenerateTableHeading("A"), 0, -1);
-                table.Controls.Add(GenerateTableHeading("B"), 1, -1);
-                table.Controls.Add(GenerateTableHeading("C"), 2, -1);
+                var nameInput = new GUIControlWrapper<TextBox>();
+                nameInput.SetAnchor(AnchorStyles.None);
+
+                var pathInput = new GUIControlWrapper<TextBox>();
+                pathInput.SetAnchor(AnchorStyles.None);
+
+                table.Controls.Add(checkbox.control, 0, -1);
+                table.Controls.Add(nameInput.control, 1, -1);
+                table.Controls.Add(pathInput.control, 2, -1);
+
+                table.RowCount += 1;
 
             }
 
