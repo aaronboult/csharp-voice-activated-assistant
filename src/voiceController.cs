@@ -10,6 +10,8 @@ namespace Control{
 
         private bool debug;
 
+        private bool speaking = false;
+
         private SpeechSynthesizer synthesiser;
 
         public VoiceController(bool debug = false){
@@ -27,6 +29,8 @@ namespace Control{
                 )
             ){
                 synthesiser.SetOutputToDefaultAudioDevice();
+
+                synthesiser.SpeakCompleted += new EventHandler<SpeakCompletedEventArgs>(this.Synthesiser_SpeechCompleted);
 
                 recognizer.LoadGrammar(new DictationGrammar());
 
@@ -48,9 +52,25 @@ namespace Control{
 
                     }
 
+                    if (!MainGUI.Reference.voiceOutputToggle && this.speaking){
+
+                        synthesiser.SpeakAsyncCancelAll();
+
+                    }
+
                 }
 
+                synthesiser.SpeakAsyncCancelAll();
+
+                recognizer.RecognizeAsyncCancel();
+
             }
+
+        }
+
+        private void Synthesiser_SpeechCompleted(object sender, SpeakCompletedEventArgs e){
+
+            this.speaking = false;
 
         }
 
@@ -78,12 +98,6 @@ namespace Control{
 
                 GUIController.LogOutput($"Voice Detected: {commandText}");
 
-                if (commandText.Split(' ')[0].ToLower() != "cake"){
-
-                    return; // If the command word does not match, return
-
-                }
-
             }
 
             try{
@@ -96,7 +110,11 @@ namespace Control{
 
                 if (MainGUI.Reference.voiceOutputToggle){
 
-                    synthesiser.Speak(result);
+                    synthesiser.SpeakAsyncCancelAll();
+
+                    this.speaking = true;
+
+                    synthesiser.SpeakAsync(result);
 
                 }
 
