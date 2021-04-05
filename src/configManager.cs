@@ -7,9 +7,12 @@ namespace Managers{
 
     public static class ConfigManager{
 
+        // The programMap is dynamic and entries can be added and removed
         public static Dictionary<string, string> programMap { get; private set; }
 
-        public static Dictionary<string, string> general { get; private set; }
+        // The general config is expected to be static and so no new entries will appear;
+        // if not present they have been removed by the user and should be added back
+        private static Dictionary<string, string> general;
 
         static ConfigManager(){
 
@@ -38,26 +41,23 @@ namespace Managers{
 
             (bool success, XmlNode node) programsNodeMatch = XmlManager.GetFirstLevelChild(title, ref doc);
 
-            Dictionary<string, string> loaded;
-
             if (programsNodeMatch.success){
 
-                loaded = XmlManager.GetMapFromDocument(
-                    programsNodeMatch.node.ChildNodes, keyAttribute, valueAttribute
-                );
+                if (programsNodeMatch.node.ChildNodes.Count > 0){
+
+                    return XmlManager.GetMapFromDocument(
+                        programsNodeMatch.node.ChildNodes, keyAttribute, valueAttribute
+                    );
+
+                }
                 
             }
-            else{
 
-                loaded = GenerateNewPathConfig();
-
-            }
-
-            return loaded;
+            return GenerateNewPathConfig();
 
         }
 
-        private static void SaveConfig(){
+        public static void SaveConfig(){
 
             string xmlBody = "<xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\">";
 
@@ -65,7 +65,7 @@ namespace Managers{
 
             foreach (KeyValuePair<string, string> pair in general){
 
-                xmlBody += $"<entry name=\"{pair.Key}\" path=\"{pair.Value}\" />";
+                xmlBody += $"<entry name=\"{pair.Key}\" value=\"{pair.Value}\" />";
 
             }
 
@@ -120,9 +120,9 @@ namespace Managers{
 
             bool success = false;
 
-            if (!ConfigManager.programMap.ContainsKey(name)){
+            if (!programMap.ContainsKey(name)){
 
-                ConfigManager.programMap.Add(name, path);
+                programMap.Add(name, path);
 
                 SaveConfig();
 
@@ -138,9 +138,9 @@ namespace Managers{
 
             bool success = false;
 
-            if (ConfigManager.programMap.ContainsKey(name)){
+            if (programMap.ContainsKey(name)){
 
-                ConfigManager.programMap.Remove(name);
+                programMap.Remove(name);
 
                 SaveConfig();
 
@@ -151,6 +151,38 @@ namespace Managers{
             return success;
 
         }
+
+        public static bool UpdateProgramMapPath(string name, string path){
+
+            bool success = false;
+
+            if (programMap.ContainsKey(name)){
+
+                programMap[name] = path;
+
+                SaveConfig();
+
+                success = true;
+
+            }
+
+            return success;
+
+        }
+
+        public static string GetGeneralConfigValue(string key){
+
+            if (general.ContainsKey(key)){
+
+                return general[key].ToLower();
+
+            }
+
+            return general[key] = "";
+
+        }
+
+        public static void UpdateGeneralConfig(string name, string value) => general[name] = value;
 
     }
 
