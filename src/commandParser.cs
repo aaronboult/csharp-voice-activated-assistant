@@ -384,7 +384,7 @@ namespace Parsing{
 
             if (match.success){
 
-                if (value == match.keyword.InnerXml){
+                if (value == match.keyword.Name){
                     
                     if (match.group.Attributes["symbol"] == null){
 
@@ -418,7 +418,7 @@ namespace Parsing{
 
                     }
 
-                    return (true, symbol, match.keyword.InnerXml);
+                    return (true, symbol, match.keyword.Name);
 
                 }
 

@@ -54,9 +54,9 @@ namespace Managers{
             (bool, XmlNode) result = (false, null);
 
             foreach (XmlNode node in group){
-
-                if (textToMatch == node.InnerXml && attributeToRead == ""){
-
+                
+                if (textToMatch == node.Name && attributeToRead == ""){
+                    
                     result = (true, node);
 
                 }
@@ -85,7 +85,7 @@ namespace Managers{
         public static (bool, XmlNode) GetFirstLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = "") => GetMatchInNodeList(textToMatch, document.FirstChild.ChildNodes, attributeToRead);
 
         /// <summary>
-        /// Determines whether an XmlDocument contains a given element two levels lower than the roow
+        /// Determines whether an XmlDocument contains a given element two levels lower than the root
         /// </summary>
         /// <param name="textToMatch">The word to check for</param>
         /// <param name="document">The document to lookup</param>
