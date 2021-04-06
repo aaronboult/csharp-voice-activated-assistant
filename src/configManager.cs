@@ -27,9 +27,9 @@ namespace Managers{
             }
             catch (FileNotFoundException){
 
-                programMap = GenerateNewGeneralConfig();
+                general = GenerateNewGeneralConfig();
 
-                general = GenerateNewPathConfig();
+                programMap = GenerateNewPathConfig();
 
                 SaveConfig();
 
@@ -167,6 +167,24 @@ namespace Managers{
             }
 
             return success;
+
+        }
+
+        public static bool UpdateProgramMapName(string oldName, string newName){
+
+            bool success = false;
+
+            if (!programMap.ContainsKey(newName)){
+                
+                AddPathToProgramMap(newName, programMap[oldName]);
+
+                RemovePathFromProgramMap(oldName);
+
+                success = true;
+
+            }
+
+            return success || oldName == newName;
 
         }
 
