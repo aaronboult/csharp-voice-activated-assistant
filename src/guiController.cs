@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
+using Managers;
 using Testing;
 
 namespace GUI{
@@ -112,7 +114,21 @@ namespace GUI{
 
             }
 
+            microphoneToggle = ConfigManager.GetGeneralConfigValue("microphone") == "true";
+
+            voiceOutputToggle = ConfigManager.GetGeneralConfigValue("speakers") == "true";
+
             ConstructMainGUI();
+
+        }
+
+        private void OnClosed(object sender, FormClosingEventArgs e){
+
+            ConfigManager.UpdateGeneralConfig("microphone", microphoneToggle.ToString());
+
+            ConfigManager.UpdateGeneralConfig("speakers", voiceOutputToggle.ToString());
+
+            ConfigManager.SaveConfig();
 
         }
 
@@ -137,6 +153,8 @@ namespace GUI{
             this.Height = 600;
 
             this.MaximizeBox = false;
+
+            this.FormClosing += new FormClosingEventHandler(this.OnClosed);
 
             var title = CreateControl<Label>(600, 75, 100, 0, AnchorStyles.Left | AnchorStyles.Right);
             title.control.Font = title.ConstructFont(24, bold: true, underline: true);
@@ -174,12 +192,12 @@ namespace GUI{
             this.openConfigButton.control.Click += new EventHandler(this.OpenConfigButton_Clicked);
 
             this.microphoneButton = CreateControl<Button>(108, 75, 469, 475, AnchorStyles.Right, 10);
-            this.microphoneButton.Text = "Unmute Microphone";
+            this.microphoneButton.Text = microphoneToggle ? "Mute Microphone" : "Unmute Microphone";
             this.microphoneButton.control.TextAlign = ContentAlignment.MiddleCenter;
             this.microphoneButton.control.Click += new EventHandler(this.MicrophoneButton_Clicked);
 
             this.voiceOutputButton = CreateControl<Button>(108, 75, 592, 475, AnchorStyles.Right, 10);
-            this.voiceOutputButton.Text = "Unmute Output";
+            this.voiceOutputButton.Text = voiceOutputToggle ? "Mute Output" : "Unmute Output";
             this.voiceOutputButton.control.TextAlign = ContentAlignment.MiddleCenter;
             this.voiceOutputButton.control.Click += new EventHandler(this.VoiceOutputButton_Clicked);
 
@@ -203,25 +221,25 @@ namespace GUI{
 
         }
 
-        public void Output_Focused(Object sender, EventArgs e){
+        public void Output_Focused(object sender, EventArgs e){
 
             this.input.control.Focus();
 
         }
 
-        public void SubmitButton_Clicked(Object sender, EventArgs e){
+        public void SubmitButton_Clicked(object sender, EventArgs e){
 
             SubmitInput();
 
         }
         
-        public void ClearButton_Clicked(Object sender, EventArgs e){
+        public void ClearButton_Clicked(object sender, EventArgs e){
 
             this.Output.Text = "";
 
         }
         
-        public void RunTestsButton_Clicked(Object sender, EventArgs e){
+        public void RunTestsButton_Clicked(object sender, EventArgs e){
 
             GUIController.LogOutput("Running tests");
             
@@ -229,13 +247,13 @@ namespace GUI{
 
         }
         
-        public void OpenConfigButton_Clicked(Object sender, EventArgs e){
+        public void OpenConfigButton_Clicked(object sender, EventArgs e){
             
             GUIController.OpenConfigGUI();
 
         }
         
-        public void MicrophoneButton_Clicked(Object sender, EventArgs e){
+        public void MicrophoneButton_Clicked(object sender, EventArgs e){
 
             microphoneToggle = !microphoneToggle;
 
@@ -243,7 +261,7 @@ namespace GUI{
 
         }
 
-        public void VoiceOutputButton_Clicked(Object sender, EventArgs e){
+        public void VoiceOutputButton_Clicked(object sender, EventArgs e){
             
             voiceOutputToggle = !voiceOutputToggle;
 
@@ -277,11 +295,36 @@ namespace GUI{
 
         private TableLayoutPanel table;
 
+        private List<string> selectedPrograms = new List<string>();
+
+        string focusedName = "";
+
         public ConfigGUI(BaseGUI parent){
 
             this.parent = parent;
 
             ConstructConfigGUI();
+
+        }
+
+        private void OnClosed(object sender, FormClosingEventArgs e){
+
+            if (focusedName == ""){
+
+                ConfigManager.SaveConfig();
+
+            }
+            else{
+
+                bool success = UpdateProgramName(this.ActiveControl);
+
+                if (!success){
+
+                    e.Cancel = true;
+
+                }
+
+            }
 
         }
 
@@ -302,6 +345,8 @@ namespace GUI{
 
             this.MaximizeBox = false;
 
+            this.FormClosing += new FormClosingEventHandler(this.OnClosed);
+
             var title = CreateControl<Label>(300, 50, 50, 0, AnchorStyles.Left | AnchorStyles.Right);
             title.control.Font = title.ConstructFont(24, bold: true, underline: true);
             title.control.Text = "Config Editor";
@@ -318,27 +363,22 @@ namespace GUI{
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 25f));
 
-            // Add table headings
-            table.Controls.Add(GenerateTableHeading("Select"), 0, 0);
-            table.Controls.Add(GenerateTableHeading("Name"), 1, 0);
-            table.Controls.Add(GenerateTableHeading("Path"), 2, 0);
-
             var removeSelectedButton = CreateControl<Button>(100, 50, 50, 500, AnchorStyles.Left, 10);
             removeSelectedButton.Text = "Remove Selected";
             removeSelectedButton.control.TextAlign = ContentAlignment.MiddleCenter;
-            // Click callback
+            removeSelectedButton.control.Click += new EventHandler(RemoveButton_Click);
 
             var addProgramButton = CreateControl<Button>(100, 50, 250, 500, AnchorStyles.Right, 10);
             addProgramButton.Text = "Add Program";
             addProgramButton.control.TextAlign = ContentAlignment.MiddleCenter;
-            // Click callback
+            addProgramButton.control.Click += new EventHandler(AddProgram_Click);
 
             this.Controls.Add(title.control);
             this.Controls.Add(table);
             this.Controls.Add(removeSelectedButton.control);
             this.Controls.Add(addProgramButton.control);
 
-            GenerateTableRows();
+            RegernateTable();
 
             ConfigGUI.Opened = true;
 
@@ -348,6 +388,29 @@ namespace GUI{
 
         }
 
+        private void RegernateTable(){
+
+            for (int i = table.Controls.Count - 1 ; i >= 0 ; i--){
+
+                table.Controls[i].Dispose();
+
+            }
+
+            table.Controls.Clear();
+
+            table.RowCount = 1;
+
+            // Add table headings
+            table.Controls.Add(GenerateTableHeading("Select"), 0, 0);
+            table.Controls.Add(GenerateTableHeading("Name"), 1, 0);
+            table.Controls.Add(GenerateTableHeading("Path"), 2, 0);
+
+            table.RowCount += 2;
+
+            GenerateTableRows();
+            
+        }
+
         private Label GenerateTableHeading(string text){
 
             var label = new GUIControlWrapper<Label>();
@@ -355,27 +418,32 @@ namespace GUI{
             label.control.TextAlign = ContentAlignment.MiddleCenter;
             label.control.Font = label.ConstructFont(fontSize: 8, bold: true);
 
-            table.RowCount += 1;
-
             return label.control;
 
         }
 
         private void GenerateTableRows(){
 
-            string[] names = { "A", "B", "C", "D" };
-
-            for (int i = 0 ; i < names.Length ; i++){
+            foreach (KeyValuePair<string, string> pair in ConfigManager.programMap){
 
                 var checkbox = new GUIControlWrapper<CheckBox>();
                 checkbox.control.CheckAlign = ContentAlignment.MiddleCenter;
                 checkbox.SetAnchor(AnchorStyles.None);
+                checkbox.control.Name = $"{pair.Key}";
+                checkbox.control.CheckedChanged += new EventHandler(ProgramCheckbox_CheckedChanged);
 
                 var nameInput = new GUIControlWrapper<TextBox>();
+                nameInput.Text = pair.Key;
                 nameInput.SetAnchor(AnchorStyles.None);
+                nameInput.control.Name = $"{pair.Key}_name";
+                nameInput.control.Enter += new EventHandler(Name_Focused);
+                nameInput.control.Leave += new EventHandler(Name_Changed);
 
-                var pathInput = new GUIControlWrapper<TextBox>();
+                var pathInput = new GUIControlWrapper<Label>();
+                pathInput.Text = pair.Value;
+                pathInput.control.Click += new EventHandler(BrowseFile_Clicked);
                 pathInput.SetAnchor(AnchorStyles.None);
+                pathInput.control.Name = $"{pair.Key}_openpath";
 
                 table.Controls.Add(checkbox.control, 0, -1);
                 table.Controls.Add(nameInput.control, 1, -1);
@@ -384,6 +452,142 @@ namespace GUI{
                 table.RowCount += 1;
 
             }
+
+        }
+
+        private void ProgramCheckbox_CheckedChanged(object sender, EventArgs e){
+
+            var check = sender as System.Windows.Forms.Control;
+
+            // Checbox has just been checked
+            if (selectedPrograms.IndexOf(check.Name) == -1){
+
+                selectedPrograms.Add(check.Name);
+
+            }
+            else{ // Checkbox being unchecked
+
+                selectedPrograms.Remove(check.Name);
+
+            }
+
+        }
+
+        private void BrowseFile_Clicked(object sender, EventArgs e){
+
+            var clicked = sender as System.Windows.Forms.Control;
+
+            string programName = clicked.Name.Split('_')[0];
+
+            var fileDialog = new OpenFileDialog(){
+                InitialDirectory = ConfigManager.programMap[programName],
+                Title = "Select Program",
+                CheckFileExists = true,
+                CheckPathExists = true,
+                DefaultExt = "exe",
+                Filter = "exe files (*.exe)|*.exe",
+                FilterIndex = 2,
+                RestoreDirectory = true,
+                ReadOnlyChecked = true,
+                ShowReadOnly = true
+            };
+
+            if (fileDialog.ShowDialog() == DialogResult.OK){
+                
+                ConfigManager.UpdateProgramMapPath(programName, fileDialog.FileName);
+
+                clicked.Text = fileDialog.FileName;
+
+            }
+
+        }
+
+        private void Name_Focused(object sender, EventArgs e){
+            
+            focusedName = (sender as System.Windows.Forms.Control).Name.Split('_')[0];
+
+        }
+
+        private void Name_Changed(object sender, EventArgs e){
+
+            focusedName = "";
+
+            UpdateProgramName(sender as System.Windows.Forms.Control);
+
+        }
+
+        private bool UpdateProgramName(System.Windows.Forms.Control nameInput){
+
+            string programName = nameInput.Name.Split('_')[0];
+
+            if (nameInput.Text == ""){
+
+                var result = MessageBox.Show(
+                    $"Are you sure you wish to delete the {programName} entry?", "Delete Program Entry",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation
+                );
+
+                if (result == DialogResult.Yes){
+
+                    ConfigManager.RemovePathFromProgramMap(programName);
+
+                    RegernateTable();
+
+                }
+                else{
+
+                    nameInput.Focus();
+
+                }
+
+                return true;
+
+            }
+            else{
+                
+                bool success = ConfigManager.UpdateProgramMapName(programName, nameInput.Text);
+
+                if (!success){
+
+                    nameInput.Focus();
+
+                    MessageBox.Show(
+                        "The entered Program Name already exists", "Program Name Conflict",
+                        MessageBoxButtons.OK, MessageBoxIcon.Exclamation
+                    );
+
+                }
+
+                return success;
+
+            }
+            
+        }
+
+        private void AddProgram_Click(object sender, EventArgs e){
+
+            // TODO Implement add program
+
+        }
+
+        private void RemoveButton_Click(object sender, EventArgs e){
+
+            var result = MessageBox.Show(
+                $"Are you sure you wish to delete {selectedPrograms.Count} program entries?", "Delete Program Entries",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation
+            );
+
+            if (result == DialogResult.Yes){
+
+                foreach (string programName in selectedPrograms){
+
+                    ConfigManager.RemovePathFromProgramMap(programName);
+
+                }
+
+            }
+
+            RegernateTable();
 
         }
 
