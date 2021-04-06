@@ -378,17 +378,17 @@ namespace Parsing{
 
         private static (bool, string, string) IsMathsKeyword(ref XmlDocument lookup, string value){
 
-            (bool success, XmlNode group, XmlNode keyword) match = XmlManager.GetSecondLevelChild(value, ref lookup);
+            (bool success, XmlNode group, XmlNode keyword) match = XmlManager.GetSecondLevelChild(value, ref lookup, matchInnerXml: true);
 
             XmlNode firstChild = lookup.FirstChild;
 
             if (match.success){
-
-                if (value == match.keyword.Name){
+                
+                if (value == match.keyword.InnerXml){
                     
                     if (match.group.Attributes["symbol"] == null){
 
-                        throw new Exception($"XML lookup group missing symbol attribute at: {lookup.Name}");
+                        throw new Exception($"XML lookup group missing symbol attribute at: {lookup.InnerXml}");
 
                     }
 
@@ -418,7 +418,7 @@ namespace Parsing{
 
                     }
 
-                    return (true, symbol, match.keyword.Name);
+                    return (true, symbol, match.keyword.InnerXml);
 
                 }
 
@@ -430,7 +430,7 @@ namespace Parsing{
 
         private static bool IsQueryIdentifier(string word, XmlNodeList lookup){
 
-            return XmlManager.GetMatchInNodeList(word, lookup).Item1;
+            return XmlManager.GetMatchInNodeList(word, lookup, matchInnerXml: true).Item1;
 
         }
 
@@ -547,7 +547,7 @@ namespace Parsing{
 
         private (bool, string) IsInformationLookupKeyword(string word, XmlNodeList lookup){
 
-            (bool success, XmlNode node) match = XmlManager.GetMatchInNodeList(word, lookup);
+            (bool success, XmlNode node) match = XmlManager.GetMatchInNodeList(word, lookup, matchInnerXml: true);
             
             if (match.success){
 
@@ -604,7 +604,7 @@ namespace Parsing{
 
         private bool IsProgramExecutionKeyword(string value, XmlNodeList lookup){
 
-            return XmlManager.GetMatchInNodeList(value, lookup).Item1;
+            return XmlManager.GetMatchInNodeList(value, lookup, matchInnerXml: true).Item1;
 
         }
 

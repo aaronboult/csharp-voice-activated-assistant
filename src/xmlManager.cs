@@ -49,7 +49,7 @@ namespace Managers{
 
         }
 
-        public static (bool, XmlNode) GetMatchInNodeList(string textToMatch, XmlNodeList group, string attributeToRead = ""){
+        public static (bool, XmlNode) GetMatchInNodeList(string textToMatch, XmlNodeList group, string attributeToRead = "", bool matchInnerXml = false){
 
             (bool, XmlNode) result = (false, null);
 
@@ -59,6 +59,15 @@ namespace Managers{
                     
                     result = (true, node);
 
+                    break;
+
+                }
+                else if (textToMatch == node.InnerXml && matchInnerXml){
+
+                    result = (true, node);
+
+                    break;
+
                 }
                 else if (attributeToRead != ""){
 
@@ -67,6 +76,8 @@ namespace Managers{
                         if (node.Attributes[attributeToRead].Value == textToMatch){
 
                             result = (true, node);
+
+                            break;
 
                         }
 
@@ -82,7 +93,7 @@ namespace Managers{
 
         }
 
-        public static (bool, XmlNode) GetFirstLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = "") => GetMatchInNodeList(textToMatch, document.FirstChild.ChildNodes, attributeToRead);
+        public static (bool, XmlNode) GetFirstLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = "", bool matchInnerXml = false) => GetMatchInNodeList(textToMatch, document.FirstChild.ChildNodes, attributeToRead, matchInnerXml);
 
         /// <summary>
         /// Determines whether an XmlDocument contains a given element two levels lower than the root
@@ -90,13 +101,13 @@ namespace Managers{
         /// <param name="textToMatch">The word to check for</param>
         /// <param name="document">The document to lookup</param>
         /// <returns>A tuple containing success, the first level node and the matched node</returns>
-        public static (bool, XmlNode, XmlNode) GetSecondLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = ""){
+        public static (bool, XmlNode, XmlNode) GetSecondLevelChild(string textToMatch, ref XmlDocument document, string attributeToRead = "", bool matchInnerXml = false){
 
             (bool, XmlNode, XmlNode) result = (false, null, null);
             
             foreach (XmlNode group in document.FirstChild.ChildNodes){
 
-                (bool success, XmlNode node) match = GetMatchInNodeList(textToMatch, group.ChildNodes, attributeToRead);
+                (bool success, XmlNode node) match = GetMatchInNodeList(textToMatch, group.ChildNodes, attributeToRead, matchInnerXml);
 
                 if (match.success){
 
