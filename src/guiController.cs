@@ -473,14 +473,9 @@ namespace GUI{
 
         }
 
-        private void BrowseFile_Clicked(object sender, EventArgs e){
-
-            var clicked = sender as System.Windows.Forms.Control;
-
-            string programName = clicked.Name.Split('_')[0];
+        private OpenFileDialog ReadProgramPathFromBrowser(string initialDirectory = ""){
 
             var fileDialog = new OpenFileDialog(){
-                InitialDirectory = ConfigManager.programMap[programName],
                 Title = "Select Program",
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -489,10 +484,38 @@ namespace GUI{
                 FilterIndex = 2,
                 RestoreDirectory = true,
                 ReadOnlyChecked = true,
-                ShowReadOnly = true
+                ShowReadOnly = true,
+                Multiselect = false
             };
 
+            if (initialDirectory != ""){
+
+                fileDialog.InitialDirectory = initialDirectory;
+
+            }
+
             if (fileDialog.ShowDialog() == DialogResult.OK){
+
+                return fileDialog;
+
+            }
+            else{
+
+                return null;
+
+            }
+
+        }
+
+        private void BrowseFile_Clicked(object sender, EventArgs e){
+
+            var clicked = sender as System.Windows.Forms.Control;
+
+            string programName = clicked.Name.Split('_')[0];
+
+            OpenFileDialog fileDialog = ReadProgramPathFromBrowser(ConfigManager.programMap[programName]);
+
+            if (fileDialog != null){
                 
                 ConfigManager.UpdateProgramMapPath(programName, fileDialog.FileName);
 
@@ -566,28 +589,42 @@ namespace GUI{
 
         private void AddProgram_Click(object sender, EventArgs e){
 
-            // TODO Implement add program
+            OpenFileDialog fileDialog = ReadProgramPathFromBrowser();
+
+            if (fileDialog != null){
+
+                ConfigManager.AddPathToProgramMap(fileDialog.SafeFileName, fileDialog.FileName);
+
+                RegernateTable();
+
+            }
 
         }
 
         private void RemoveButton_Click(object sender, EventArgs e){
 
-            var result = MessageBox.Show(
-                $"Are you sure you wish to delete {selectedPrograms.Count} program entries?", "Delete Program Entries",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation
-            );
+            if (selectedPrograms.Count > 0){
 
-            if (result == DialogResult.Yes){
+                var result = MessageBox.Show(
+                    $"Are you sure you wish to delete {selectedPrograms.Count} program entries?", "Delete Program Entries",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation
+                );
 
-                foreach (string programName in selectedPrograms){
+                if (result == DialogResult.Yes){
 
-                    ConfigManager.RemovePathFromProgramMap(programName);
+                    foreach (string programName in selectedPrograms){
+
+                        ConfigManager.RemovePathFromProgramMap(programName);
+
+                    }
 
                 }
 
-            }
+                selectedPrograms = new List<string>();
 
-            RegernateTable();
+                RegernateTable();
+
+            }
 
         }
 
